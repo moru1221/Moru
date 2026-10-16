@@ -468,4 +468,196 @@
             <div class="preset-buttons">
                 <button onclick="setTimer(30, false)">30분 집중</button>
                 <button onclick="setTimer(60, false)">1시간 집중</button>
-                <button class="break-preset" onclick="setTimer(10, true)">10
+                <button class="break-preset" onclick="setTimer(10, true)">10분 휴식</button>
+            </div>
+
+            <div class="custom-input-box">
+                <div class="custom-input-row">
+                    <input type="text" id="customMinutes" placeholder="직접 입력 (분)" autocomplete="off">
+                    <button onclick="setCustomTimer()">설정</button>
+                </div>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="breakModeCheckbox"> 휴식 시간으로 설정하기
+                </label>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-start" onclick="startTimer()">타이머 시작</button>
+            <button class="btn-stop" onclick="stopTimer()">정지 / 초기화</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const studyVideos = ['study_1.mp4', 'study_2.mp4'];
+    
+    let totalSeconds = 30 * 60;
+    let timerInterval = null;
+    let isBreakTime = false;
+    let isEasterEggMode = false;
+    let accumulatedStudySeconds = 0;
+
+    let breakVideoStage = 0;
+
+    let activeVidIndex = 1;
+    const v1 = document.getElementById('vid1');
+    const v2 = document.getElementById('vid2');
+
+    window.onload = () => {
+        playRandomStudyVideo();
+        updateDisplay();
+        initAsmrMixer();
+    };
+
+    v1.addEventListener('ended', () => handleVideoEnd());
+    v2.addEventListener('ended', () => handleVideoEnd());
+
+    function handleVideoEnd() {
+        if (isEasterEggMode) {
+            // 이스터에그 영상은 끝났을 때 반복하지 않고 그대로 종료(마지막 프레임 유지)
+            return;
+        }
+
+        if (!isBreakTime) {
+            playRandomStudyVideo();
+        } else {
+            if (breakVideoStage === 1) {
+                breakVideoStage = 2;
+                playSpecificVideo('study_4.mp4', true, true);
+            } else if (breakVideoStage === 2) {
+                playSpecificVideo('study_4.mp4', true, true);
+            } else if (breakVideoStage === 3) {
+                playSpecificVideo('study_5.mp4', true, true);
+            }
+        }
+    }
+
+    function playRandomStudyVideo() {
+        if (isEasterEggMode) return;
+        const randomIndex = Math.floor(Math.random() * studyVideos.length);
+        playSpecificVideo(studyVideos[randomIndex], false, true);
+        document.getElementById('sourceInfo').innerText = `집중 영상 ${randomIndex + 1}`;
+    }
+
+    function playSpecificVideo(filename, isLoop, isMuted) {
+        let currentVid = (activeVidIndex === 1) ? v1 : v2;
+        let nextVid = (activeVidIndex === 1) ? v2 : v1;
+
+        // 다른 비디오의 소리를 완전히 차단하고 정지
+        currentVid.pause();
+        currentVid.currentTime = 0;
+        currentVid.muted = true;
+
+        nextVid.loop = isLoop;
+        nextVid.muted = isMuted;
+        nextVid.src = filename;
+        nextVid.load();
+        
+        nextVid.play().then(() => {
+            nextVid.classList.add('active');
+            currentVid.classList.remove('active');
+            activeVidIndex = (activeVidIndex === 1) ? 2 : 1;
+        }).catch(e => {
+            console.log("자동재생 대기중:", e);
+        });
+    }
+
+    function updateDisplay() {
+        const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+        const seconds = String(totalSeconds % 60).padStart(2, '0');
+        document.getElementById('display').innerText = `${hours}:${minutes}:${seconds}`;
+    }
+
+    function setCustomTimer() {
+        const inputVal = document.getElementById('customMinutes').value.trim();
+        const isBreakChecked = document.getElementById('breakModeCheckbox').checked;
+
+        if (isBreakChecked && inputVal === '0824') {
+            if (window.confirm("너 정말 이만큼 쉴꺼야?")) {
+                triggerEasterEgg();
+            }
+            return;
+        }
+
+        const mins = parseInt(inputVal);
+        if (isNaN(mins) || mins <= 0) {
+            alert("올바른 분(Minute)을 입력하세요.");
+            return;
+        }
+        setTimer(mins, isBreakChecked);
+    }
+
+    function setTimer(minutes, breakMode) {
+        stopTimer();
+        isEasterEggMode = false;
+        totalSeconds = minutes * 60;
+        isBreakTime = breakMode;
+        breakVideoStage = 0;
+
+        const badge = document.getElementById('modeBadge');
+        const timerLabel = document.getElementById('timerModeLabel');
+
+        if (isBreakTime) {
+            badge.innerText = "휴식 시간 모드";
+            badge.className = "mode-badge break";
+            timerLabel.innerText = "휴식 시간";
+            timerLabel.style.color = "#bb8009";
+            
+            breakVideoStage = 1;
+            playSpecificVideo('study_3.mp4', false, true);
+            document.getElementById('sourceInfo').innerText = "휴식 영상 (시작)";
+        } else {
+            badge.innerText = "집중 공부 모드";
+            badge.className = "mode-badge";
+            timerLabel.innerText = "집중 공부 모드";
+            timerLabel.style.color = "#2ea043";
+            playRandomStudyVideo();
+        }
+        updateDisplay();
+    }
+
+    function triggerEasterEgg() {
+        stopTimer();
+        isEasterEggMode = true;
+        isBreakTime = true;
+        totalSeconds = 824 * 60;
+
+        // 배경 ASMR 소리 충돌 방지를 위해 전부 정지
+        stopAllSounds();
+
+        const badge = document.getElementById('modeBadge');
+        const timerLabel = document.getElementById('timerModeLabel');
+
+        badge.innerText = "시크릿 휴식 모드";
+        badge.className = "mode-badge easteregg";
+        timerLabel.innerText = "0824 시크릿 휴식";
+        timerLabel.style.color = "rgb(255, 0, 255)";
+
+        // 3번째 인자 false로 주어 음소거 해제, 2번째 인자 false로 주어 반복(loop) 없이 딱 한 번만 재생
+        playSpecificVideo('video_0824.mp4', false, false);
+        document.getElementById('sourceInfo').innerText = "시크릿 영상 재생 중";
+        updateDisplay();
+    }
+
+    function startTimer() {
+        if (timerInterval || totalSeconds <= 0) return;
+        
+        if (isBreakTime && !isEasterEggMode && breakVideoStage === 0) {
+            breakVideoStage = 1;
+            playSpecificVideo('study_3.mp4', false, true);
+        }
+
+        timerInterval = setInterval(() => {
+            if (totalSeconds > 0) {
+                totalSeconds--;
+                updateDisplay();
+
+                if (isBreakTime && !isEasterEggMode && totalSeconds === 2 && breakVideoStage < 3) {
+                    breakVideoStage = 3;
+                    playSpecificVideo('study_5.mp4', false, true);
+                    document.getElementById('sourceInfo').innerText = "휴식 임박 (2초 전)";
+                }
+
+                if (!isBreakTime
