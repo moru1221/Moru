@@ -193,11 +193,17 @@
         const isBreak = document.getElementById('breakModeCheckbox').checked;
 
         if (isBreak && val === '120') {
-            if (window.confirm("너 정말 이만큼 쉴꺼야?")) triggerEasterEgg('video_0824.mp4', 120, "120 시크릿 휴식");
+            if (window.confirm("너 정말 이만큼 쉴꺼야?")) {
+                triggerEasterEgg('video_0824.mp4', 120, "120 시크릿 휴식");
+            }
             return;
         }
         if (isBreak && val === '60') {
             triggerEasterEgg('video_60.mp4', 60, "60분 시크릿 휴식");
+            return;
+        }
+        if (isBreak && val === '30') {
+            triggerEasterEgg('video_30.mp4', 30, "30분 시크릿 휴식");
             return;
         }
 
