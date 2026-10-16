@@ -30,6 +30,7 @@
             width: 100%;
             max-width: 850px;
             border: 1px solid #30363d;
+            position: relative;
         }
         .left-panel {
             flex: 1.1;
@@ -269,6 +270,122 @@
             color: white;
         }
 
+        /* 인라인 ASMR 패널 (팝업 대신 메인 화면 내 모달 오버레이 방식) */
+        .asmr-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(13, 17, 23, 0.92);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .asmr-modal.active {
+            display: flex;
+        }
+        .asmr-modal h3 {
+            color: rgb(255, 0, 255);
+            margin-bottom: 4px;
+            font-size: 20px;
+        }
+        .asmr-modal p {
+            color: #8b949e;
+            font-size: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .mixer-container {
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 12px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 420px;
+            max-height: 320px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .sound-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #21262d;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+        }
+        .sound-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 120px;
+        }
+        .sound-info span {
+            font-size: 13px;
+            font-weight: bold;
+            color: #c9d1d9;
+        }
+        .toggle-btn {
+            background: #30363d;
+            color: #8b949e;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .toggle-btn.active {
+            background: #2ea043;
+            color: white;
+        }
+        input[type=range] {
+            flex: 1;
+            margin-left: 12px;
+            height: 6px;
+            accent-color: #2ea043;
+            cursor: pointer;
+        }
+        .asmr-bottom-btns {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            max-width: 420px;
+        }
+        .asmr-close-btn {
+            background: #2ea043;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            flex: 1;
+        }
+        .asmr-all-stop {
+            background: #da3633;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            flex: 1;
+        }
+
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -287,6 +404,18 @@
 <body>
 
 <div class="main-container">
+    <!-- ASMR 인라인 패널 (팝업 대신 창 내부에서 열리고 닫혀도 소리 유지) -->
+    <div id="asmrModal" class="asmr-modal">
+        <h3>🎧 ASMR 사운드 믹서</h3>
+        <p>설정창을 닫아도 선택한 소리는 백그라운드에서 계속 재생됩니다.</p>
+        <div class="mixer-container" id="mixerBox"></div>
+        <div class="asmr-bottom-btns">
+            <button class="asmr-all-stop" onclick="stopAllSounds()">모든 소리 끄기</button>
+            <button class="asmr-close-btn" onclick="toggleAsmrPanel()">설정 완료 (닫기)</button>
+        </div>
+    </div>
+
+    <!-- 왼쪽 영역: 영상 및 캐릭터 상태 -->
     <div class="left-panel">
         <div class="video-card">
             <div class="video-header">
@@ -311,6 +440,7 @@
         </div>
     </div>
 
+    <!-- 오른쪽 영역: 타이머 컨트롤 -->
     <div class="right-panel">
         <div>
             <div class="panel-top-header">
@@ -318,7 +448,7 @@
                     <h2>오늘도 열심히 공부</h2>
                     <p>타이머를 설정하고 캐릭터와 함께 공부하세요.</p>
                 </div>
-                <button class="asmr-btn" onclick="openAsmrPopup()">ASMR</button>
+                <button class="asmr-btn" onclick="toggleAsmrPanel()">ASMR</button>
             </div>
 
             <div class="timer-card">
@@ -355,24 +485,22 @@
     const studyVideos = ['study_1.mp4', 'study_2.mp4'];
     
     let totalSeconds = 30 * 60;
-    let initialTotalSeconds = 30 * 60; // 총 설정 시간 기록용
     let timerInterval = null;
     let isBreakTime = false;
     let currentMode = 'study';
     let accumulatedStudySeconds = 0;
 
-    // 휴식 모드 영상 제어를 위한 상태 변수 (0: 시작 전, 1: study_3 재생 중, 2: study_4 반복 재생 중, 3: study_5 2초 남음 전환 완료)
+    // 휴식 모드 영상 제어 상태 (0: 대기, 1: study_3 재생중, 2: study_4 반복, 3: study_5 임박 2초전)
     let breakVideoStage = 0;
 
     let activeVidIndex = 1;
     const v1 = document.getElementById('vid1');
     const v2 = document.getElementById('vid2');
 
-    let asmrWindow = null;
-
     window.onload = () => {
         playRandomStudyVideo();
         updateDisplay();
+        initAsmrMixer();
     };
 
     v1.addEventListener('ended', () => handleVideoEnd());
@@ -382,29 +510,23 @@
         if (!isBreakTime) {
             playRandomStudyVideo();
         } else {
-            // 휴식 모드 영상 제어 로직
             if (breakVideoStage === 1) {
-                // study_3이 끝나면 -> study_4로 넘어가서 반복 재생 시작
                 breakVideoStage = 2;
-                playSpecificVideo('study_4.mp4', true); // true는 loop 설정
+                playSpecificVideo('study_4.mp4', true); // 반복 재생
             } else if (breakVideoStage === 2) {
-                // study_4가 혹시 끝나더라도 계속 study_4 반복
                 playSpecificVideo('study_4.mp4', true);
             } else if (breakVideoStage === 3) {
-                // study_5가 끝나면 study_5 반복 유지
                 playSpecificVideo('study_5.mp4', true);
             }
         }
     }
 
-    // 집중 모드일 때 study_1, study_2 중 랜덤 재생
     function playRandomStudyVideo() {
         const randomIndex = Math.floor(Math.random() * studyVideos.length);
         playSpecificVideo(studyVideos[randomIndex], false);
         document.getElementById('sourceInfo').innerText = `집중 영상 ${randomIndex + 1}`;
     }
 
-    // 특정 영상 재생 함수 (루프 여부 지정 가능)
     function playSpecificVideo(filename, isLoop) {
         let currentVid = (activeVidIndex === 1) ? v1 : v2;
         let nextVid = (activeVidIndex === 1) ? v2 : v1;
@@ -432,7 +554,6 @@
     function setTimer(minutes, breakMode) {
         stopTimer();
         totalSeconds = minutes * 60;
-        initialTotalSeconds = totalSeconds;
         isBreakTime = breakMode;
         breakVideoStage = 0;
 
@@ -445,7 +566,6 @@
             timerLabel.innerText = "휴식 시간";
             timerLabel.style.color = "#bb8009";
             
-            // 휴식 시작 시: study_3 재생 예약 (타이머 시작할 때 혹은 지금 바로)
             breakVideoStage = 1;
             playSpecificVideo('study_3.mp4', false);
             document.getElementById('sourceInfo').innerText = "휴식 영상 (시작)";
@@ -472,7 +592,6 @@
     function startTimer() {
         if (timerInterval || totalSeconds <= 0) return;
         
-        // 만약 휴식 모드인데 아직 영상을 안 틀었거나 정지 상태였다면 stage 확인
         if (isBreakTime && breakVideoStage === 0) {
             breakVideoStage = 1;
             playSpecificVideo('study_3.mp4', false);
@@ -483,7 +602,6 @@
                 totalSeconds--;
                 updateDisplay();
 
-                // 휴식 모드일 때 남은 시간이 정확히 2초 남았을 때 study_5로 전환
                 if (isBreakTime && totalSeconds === 2 && breakVideoStage < 3) {
                     breakVideoStage = 3;
                     playSpecificVideo('study_5.mp4', false);
@@ -496,7 +614,6 @@
                 }
             } else {
                 stopTimer();
-                stopMainAsmr();
                 alert(isBreakTime ? "휴식 시간이 종료되었습니다!" : "공부 시간이 종료되었습니다! 수고하셨습니다.");
             }
         }, 1000);
@@ -505,7 +622,6 @@
     function stopTimer() {
         clearInterval(timerInterval);
         timerInterval = null;
-        stopMainAsmr();
     }
 
     function updateCharacterProgress() {
@@ -519,193 +635,80 @@
         document.getElementById('levelText').innerText = `성장 단계: Lv.${level} 수련생`;
     }
 
-    // 모바일 최적화 ASMR 팝업창 함수
-    function openAsmrPopup() {
-        const popupWidth = 500;
-        const popupHeight = 780;
-        const left = (window.innerWidth - popupWidth) / 2 + window.screenX;
-        const top = (window.innerHeight - popupHeight) / 2 + window.screenY;
+    /* --- ASMR 백그라운드 유지형 믹서 로직 --- */
+    const soundTracks = [
+        { id: 'birds', name: '새소리 🐦', file: 'birds.mp3' },
+        { id: 'crickets', name: '귀뚜라미 🦗', file: 'crickets.mp3' },
+        { id: 'fire', name: '모닥불 🪵', file: 'fire.mp3' },
+        { id: 'keyboard', name: '키보드 ⌨️', file: 'keyboard.mp3' },
+        { id: 'rain', name: '비 오는 소리 🌧️', file: 'rain.mp3' },
+        { id: 'singingbowl', name: '싱잉볼 🔔', file: 'singingbowl.mp3' },
+        { id: 'thunder', name: '천둥 번개 ⚡', file: 'thunder.mp3' },
+        { id: 'waves', name: '파도 소리 🌊', file: 'waves.mp3' },
+        { id: 'wind', name: '바람 소리 🌬️', file: 'wind.mp3' }
+    ];
 
-        asmrWindow = window.open('', 'ASMRMixer', `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`);
-        
-        asmrWindow.document.write(`
-            <!DOCTYPE html>
-            <html lang="ko">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>ASMR 사운드 믹서</title>
-                <style>
-                    * { box-sizing: border-box; }
-                    body {
-                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                        background-color: #0d1117;
-                        color: #ffffff;
-                        margin: 0;
-                        padding: 20px;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        min-height: 100vh;
-                    }
-                    h2 { color: rgb(255, 0, 255); margin-bottom: 6px; font-size: 22px; text-align: center; }
-                    p { color: #8b949e; font-size: 13px; margin-bottom: 20px; text-align: center; }
-                    .mixer-container {
-                        background: #161b22;
-                        border: 1px solid #30363d;
-                        padding: 18px;
-                        border-radius: 16px;
-                        width: 100%;
-                        max-width: 440px;
-                        display: flex;
-                        flex-direction: column;
-                        gap: 14px;
-                    }
-                    .sound-row {
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        background: #21262d;
-                        padding: 12px 16px;
-                        border-radius: 12px;
-                        border: 1px solid #30363d;
-                    }
-                    .sound-info {
-                        display: flex;
-                        align-items: center;
-                        gap: 12px;
-                        width: 140px;
-                    }
-                    .sound-info span {
-                        font-size: 14px;
-                        font-weight: bold;
-                        color: #c9d1d9;
-                    }
-                    .toggle-btn {
-                        background: #30363d;
-                        color: #8b949e;
-                        border: none;
-                        padding: 8px 14px;
-                        border-radius: 8px;
-                        font-size: 12px;
-                        font-weight: bold;
-                        cursor: pointer;
-                        transition: 0.2s;
-                    }
-                    .toggle-btn.active {
-                        background: #2ea043;
-                        color: white;
-                    }
-                    input[type=range] {
-                        flex: 1;
-                        margin-left: 15px;
-                        height: 8px;
-                        accent-color: #2ea043;
-                        cursor: pointer;
-                    }
-                    .all-stop-btn {
-                        background: #da3633;
-                        color: white;
-                        border: none;
-                        padding: 14px;
-                        border-radius: 12px;
-                        font-weight: bold;
-                        font-size: 15px;
-                        cursor: pointer;
-                        width: 100%;
-                        max-width: 440px;
-                        margin-top: 20px;
-                        box-shadow: 0 4px 12px rgba(218, 54, 51, 0.4);
-                    }
-                    .all-stop-btn:hover { background: #c5302c; }
-                </style>
-            </head>
-            <body>
-                <h2>🎧 ASMR 사운드 믹서</h2>
-                <p>원하는 소리를 켜고 볼륨을 조절해 나만의 조합을 만드세요.</p>
+    const audioElements = {};
 
-                <div class="mixer-container" id="mixerBox"></div>
+    function initAsmrMixer() {
+        const mixerBox = document.getElementById('mixerBox');
+        soundTracks.forEach(track => {
+            const audio = new Audio(track.file);
+            audio.loop = true;
+            audio.volume = 0.5;
+            audioElements[track.id] = audio;
 
-                <button class="all-stop-btn" onclick="stopAllSounds()">모든 소리 끄기 ⏹️</button>
-
-                <script>
-                    const soundTracks = [
-                        { id: 'birds', name: '새소리 🐦', file: 'birds.mp3' },
-                        { id: 'crickets', name: '귀뚜라미 🦗', file: 'crickets.mp3' },
-                        { id: 'fire', name: '모닥불 🪵', file: 'fire.mp3' },
-                        { id: 'keyboard', name: '키보드 ⌨️', file: 'keyboard.mp3' },
-                        { id: 'rain', name: '비 오는 소리 🌧️', file: 'rain.mp3' },
-                        { id: 'singingbowl', name: '싱잉볼 🔔', file: 'singingbowl.mp3' },
-                        { id: 'thunder', name: '천둥 번개 ⚡', file: 'thunder.mp3' },
-                        { id: 'waves', name: '파도 소리 🌊', file: 'waves.mp3' },
-                        { id: 'wind', name: '바람 소리 🌬️', file: 'wind.mp3' }
-                    ];
-
-                    const audioElements = {};
-                    const mixerBox = document.getElementById('mixerBox');
-
-                    soundTracks.forEach(track => {
-                        const audio = new Audio(track.file);
-                        audio.loop = true;
-                        audio.volume = 0.5;
-                        audioElements[track.id] = audio;
-
-                        const row = document.createElement('div');
-                        row.className = 'sound-row';
-                        row.innerHTML = \`
-                            <div class="sound-info">
-                                <button class="toggle-btn" id="btn-\${track.id}" onclick="toggleSound('\${track.id}')">OFF</button>
-                                <span>\${track.name}</span>
-                            </div>
-                            <input type="range" id="vol-\${track.id}" min="0" max="1" step="0.01" value="0.5" oninput="changeVolume('\${track.id}', this.value)">
-                        \`;
-                        mixerBox.appendChild(row);
-                    });
-
-                    function toggleSound(id) {
-                        const audio = audioElements[id];
-                        const btn = document.getElementById('btn-' + id);
-
-                        if (audio.paused) {
-                            audio.play().then(() => {
-                                btn.classList.add('active');
-                                btn.innerText = 'ON';
-                            }).catch(e => {
-                                alert("음원 파일을 찾을 수 없거나 재생이 차단되었습니다.");
-                            });
-                        } else {
-                            audio.pause();
-                            btn.classList.remove('active');
-                            btn.innerText = 'OFF';
-                        }
-                    }
-
-                    function changeVolume(id, val) {
-                        audioElements[id].volume = val;
-                    }
-
-                    function stopAllSounds() {
-                        soundTracks.forEach(track => {
-                            const audio = audioElements[track.id];
-                            audio.pause();
-                            audio.currentTime = 0;
-                            const btn = document.getElementById('btn-' + track.id);
-                            btn.classList.remove('active');
-                            btn.innerText = 'OFF';
-                        });
-                    }
-                <\/script>
-            </body>
-            </html>
-        `);
+            const row = document.createElement('div');
+            row.className = 'sound-row';
+            row.innerHTML = `
+                <div class="sound-info">
+                    <button class="toggle-btn" id="btn-${track.id}" onclick="toggleSound('${track.id}')">OFF</button>
+                    <span>${track.name}</span>
+                </div>
+                <input type="range" id="vol-${track.id}" min="0" max="1" step="0.01" value="0.5" oninput="changeVolume('${track.id}', this.value)">
+            `;
+            mixerBox.appendChild(row);
+        });
     }
 
-    function stopMainAsmr() {
-        if (asmrWindow && !asmrWindow.closed) {
-            try {
-                asmrWindow.stopAllSounds();
-            } catch (e) {}
+    function toggleAsmrPanel() {
+        const modal = document.getElementById('asmrModal');
+        modal.classList.toggle('active');
+    }
+
+    function toggleSound(id) {
+        const audio = audioElements[id];
+        const btn = document.getElementById('btn-' + id);
+
+        if (audio.paused) {
+            audio.play().then(() => {
+                btn.classList.add('active');
+                btn.innerText = 'ON';
+            }).catch(e => {
+                alert("음원 파일을 찾을 수 없거나 재생이 차단되었습니다.");
+            });
+        } else {
+            audio.pause();
+            btn.classList.remove('active');
+            btn.innerText = 'OFF';
         }
+    }
+
+    function changeVolume(id, val) {
+        audioElements[id].volume = val;
+    }
+
+    function stopAllSounds() {
+        soundTracks.forEach(track => {
+            const audio = audioElements[track.id];
+            audio.pause();
+            audio.currentTime = 0;
+            const btn = document.getElementById('btn-' + track.id);
+            if(btn) {
+                btn.classList.remove('active');
+                btn.innerText = 'OFF';
+            }
+        });
     }
 </script>
 
