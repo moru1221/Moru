@@ -354,8 +354,9 @@
     }
 
     function openAsmrPopup() {
-        const popupWidth = 460;
-        const popupHeight = 620;
+        // 안드로이드 스마트폰 화면에서도 시원하게 보이도록 팝업창 크기 대폭 확장 (폭 500, 높이 780)
+        const popupWidth = 500;
+        const popupHeight = 780;
         const left = (window.innerWidth - popupWidth) / 2 + window.screenX;
         const top = (window.innerHeight - popupHeight) / 2 + window.screenY;
 
@@ -366,8 +367,10 @@
             <html lang="ko">
             <head>
                 <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>ASMR 사운드 믹서</title>
                 <style>
+                    * { box-sizing: border-box; }
                     body {
                         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                         background-color: #0d1117;
@@ -377,47 +380,50 @@
                         display: flex;
                         flex-direction: column;
                         align-items: center;
+                        min-height: 100vh;
                     }
-                    h2 { color: rgb(255, 0, 255); margin-bottom: 5px; font-size: 20px; }
-                    p { color: #8b949e; font-size: 12px; margin-bottom: 15px; }
+                    h2 { color: rgb(255, 0, 255); margin-bottom: 6px; font-size: 22px; text-align: center; }
+                    p { color: #8b949e; font-size: 13px; margin-bottom: 20px; text-align: center; }
+                    
                     .mixer-container {
                         background: #161b22;
                         border: 1px solid #30363d;
-                        padding: 15px;
-                        border-radius: 12px;
+                        padding: 18px;
+                        border-radius: 16px;
                         width: 100%;
-                        max-width: 400px;
+                        max-width: 440px;
                         display: flex;
                         flex-direction: column;
-                        gap: 12px;
+                        gap: 14px;
                     }
                     .sound-row {
                         display: flex;
                         align-items: center;
                         justify-content: space-between;
                         background: #21262d;
-                        padding: 8px 12px;
-                        border-radius: 8px;
+                        padding: 12px 16px;
+                        border-radius: 12px;
                         border: 1px solid #30363d;
                     }
                     .sound-info {
                         display: flex;
                         align-items: center;
-                        gap: 10px;
-                        width: 120px;
+                        gap: 12px;
+                        width: 140px;
                     }
                     .sound-info span {
-                        font-size: 13px;
+                        font-size: 14px;
                         font-weight: bold;
                         color: #c9d1d9;
                     }
+                    /* 스마트폰 터치 편의성을 위한 토글 버튼 크기 확대 */
                     .toggle-btn {
                         background: #30363d;
                         color: #8b949e;
                         border: none;
-                        padding: 5px 10px;
-                        border-radius: 6px;
-                        font-size: 11px;
+                        padding: 8px 14px;
+                        border-radius: 8px;
+                        font-size: 12px;
                         font-weight: bold;
                         cursor: pointer;
                         transition: 0.2s;
@@ -426,9 +432,11 @@
                         background: #2ea043;
                         color: white;
                     }
+                    /* 슬라이더 바 조작감 개선 */
                     input[type=range] {
                         flex: 1;
                         margin-left: 15px;
+                        height: 8px;
                         accent-color: #2ea043;
                         cursor: pointer;
                     }
@@ -436,13 +444,15 @@
                         background: #da3633;
                         color: white;
                         border: none;
-                        padding: 10px;
-                        border-radius: 8px;
+                        padding: 14px;
+                        border-radius: 12px;
                         font-weight: bold;
-                        font-size: 13px;
+                        font-size: 15px;
                         cursor: pointer;
                         width: 100%;
-                        margin-top: 15px;
+                        max-width: 440px;
+                        margin-top: 20px;
+                        box-shadow: 0 4px 12px rgba(218, 54, 51, 0.4);
                     }
                     .all-stop-btn:hover { background: #c5302c; }
                 </style>
@@ -456,7 +466,6 @@
                 <button class="all-stop-btn" onclick="stopAllSounds()">모든 소리 끄기 ⏹️</button>
 
                 <script>
-                    // 카페 소음이 완전히 제거된 9가지 ASMR 트랙 리스트
                     const soundTracks = [
                         { id: 'birds', name: '새소리 🐦', file: 'birds.mp3' },
                         { id: 'crickets', name: '귀뚜라미 🦗', file: 'crickets.mp3' },
