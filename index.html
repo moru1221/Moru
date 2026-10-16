@@ -473,7 +473,6 @@
 
             <div class="custom-input-box">
                 <div class="custom-input-row">
-                    <!-- input 타입을 텍스트로 변경하여 0824 입력을 완벽하게 보장 -->
                     <input type="text" id="customMinutes" placeholder="직접 입력 (분)" autocomplete="off">
                     <button onclick="setCustomTimer()">설정</button>
                 </div>
@@ -491,6 +490,7 @@
 </div>
 
 <script>
+    // [캐시 강제 갱신 버전: 20261016-v2]
     const studyVideos = ['study_1.mp4', 'study_2.mp4'];
     
     let totalSeconds = 30 * 60;
@@ -566,6 +566,27 @@
         document.getElementById('display').innerText = `${hours}:${minutes}:${seconds}`;
     }
 
+    // 설정 버튼 누를 때 실행되는 함수 (이스터에그 검사 최우선 배치)
+    function setCustomTimer() {
+        const inputVal = document.getElementById('customMinutes').value.trim();
+        const isBreakChecked = document.getElementById('breakModeCheckbox').checked;
+
+        // 디버깅 및 즉시 실행을 위한 이스터에그 체크
+        if (isBreakChecked && inputVal === '0824') {
+            if (window.confirm("너 정말 이만큼 쉴꺼야?")) {
+                triggerEasterEgg();
+            }
+            return;
+        }
+
+        const mins = parseInt(inputVal);
+        if (isNaN(mins) || mins <= 0) {
+            alert("올바른 분(Minute)을 입력하세요.");
+            return;
+        }
+        setTimer(mins, isBreakChecked);
+    }
+
     function setTimer(minutes, breakMode) {
         stopTimer();
         isEasterEggMode = false;
@@ -595,26 +616,6 @@
         updateDisplay();
     }
 
-    function setCustomTimer() {
-        const inputVal = document.getElementById('customMinutes').value.trim();
-        const isBreakChecked = document.getElementById('breakModeCheckbox').checked;
-
-        // 이스터에그 조건 검사 (휴식 체크 + '0824' 입력)
-        if (isBreakChecked && inputVal === '0824') {
-            if (confirm("너 정말 이만큼 쉴꺼야?")) {
-                triggerEasterEgg();
-            }
-            return;
-        }
-
-        const mins = parseInt(inputVal);
-        if (isNaN(mins) || mins <= 0) {
-            alert("올바른 분(Minute)을 입력하세요.");
-            return;
-        }
-        setTimer(mins, isBreakChecked);
-    }
-
     function triggerEasterEgg() {
         stopTimer();
         isEasterEggMode = true;
@@ -629,7 +630,7 @@
         timerLabel.innerText = "0824 시크릿 휴식";
         timerLabel.style.color = "rgb(255, 0, 255)";
 
-        playSpecificVideo('video_0824.mp4', true, false); // 음소거 해제 상태로 영상 재생
+        playSpecificVideo('video_0824.mp4', true, false); // 음소거 해제 후 오디오와 함께 재생
         document.getElementById('sourceInfo').innerText = "시크릿 영상 재생 중";
         updateDisplay();
     }
@@ -653,119 +654,4 @@
                     document.getElementById('sourceInfo').innerText = "휴식 임박 (2초 전)";
                 }
 
-                if (!isBreakTime) {
-                    accumulatedStudySeconds++;
-                    updateCharacterProgress();
-                }
-            } else {
-                stopTimer();
-                
-                if (isBreakTime) {
-                    alert("휴식 시간이 종료되었습니다! 집중 공부 모드로 전환합니다.");
-                    setTimer(30, false);
-                    startTimer();
-                } else {
-                    alert("공부 시간이 종료되었습니다! 수고하셨습니다.");
-                }
-            }
-        }, 1000);
-    }
-
-    function stopTimer() {
-        clearInterval(timerInterval);
-        timerInterval = null;
-    }
-
-    function updateCharacterProgress() {
-        const totalMinutes = Math.floor(accumulatedStudySeconds / 60);
-        document.getElementById('totalStudyText').innerText = `누적 공부: ${totalMinutes}분`;
-
-        const progressPercent = Math.min((totalMinutes % 60) / 60 * 100, 100);
-        document.getElementById('progressBar').style.width = `${progressPercent}%`;
-
-        let level = Math.floor(totalMinutes / 60) + 1;
-        document.getElementById('levelText').innerText = `성장 단계: Lv.${level} 수련생`;
-    }
-
-    /* ASMR 10가지 트랙 (왁뿌볼 포함) */
-    const soundTracks = [
-        { id: 'birds', name: '새소리 🐦', file: 'birds.mp3' },
-        { id: 'crickets', name: '귀뚜라미 🦗', file: 'crickets.mp3' },
-        { id: 'fire', name: '모닥불 🪵', file: 'fire.mp3' },
-        { id: 'keyboard', name: '키보드 ⌨️', file: 'keyboard.mp3' },
-        { id: 'rain', name: '비 오는 소리 🌧️', file: 'rain.mp3' },
-        { id: 'singingbowl', name: '싱잉볼 🔔', file: 'singingbowl.mp3' },
-        { id: 'thunder', name: '천둥 번개 ⚡', file: 'thunder.mp3' },
-        { id: 'waves', name: '파도 소리 🌊', file: 'waves.mp3' },
-        { id: 'wind', name: '바람 소리 🌬️', file: 'wind.mp3' },
-        { id: 'wax', name: '왁뿌볼 🔮', file: 'wax.mp3' }
-    ];
-
-    const audioElements = {};
-
-    function initAsmrMixer() {
-        const mixerBox = document.getElementById('mixerBox');
-        mixerBox.innerHTML = "";
-        
-        soundTracks.forEach(track => {
-            const audio = new Audio(track.file);
-            audio.loop = true;
-            audio.volume = 0.5;
-            audioElements[track.id] = audio;
-
-            const row = document.createElement('div');
-            row.className = 'sound-row';
-            row.innerHTML = `
-                <div class="sound-info">
-                    <button class="toggle-btn" id="btn-${track.id}" onclick="toggleSound('${track.id}')">OFF</button>
-                    <span>${track.name}</span>
-                </div>
-                <input type="range" id="vol-${track.id}" min="0" max="1" step="0.01" value="0.5" oninput="changeVolume('${track.id}', this.value)">
-            `;
-            mixerBox.appendChild(row);
-        });
-    }
-
-    function toggleAsmrPanel() {
-        const modal = document.getElementById('asmrModal');
-        modal.classList.toggle('active');
-    }
-
-    function toggleSound(id) {
-        const audio = audioElements[id];
-        const btn = document.getElementById('btn-' + id);
-
-        if (audio.paused) {
-            audio.play().then(() => {
-                btn.classList.add('active');
-                btn.innerText = 'ON';
-            }).catch(e => {
-                alert("음원 파일을 찾을 수 없거나 재생이 차단되었습니다.");
-            });
-        } else {
-            audio.pause();
-            btn.classList.remove('active');
-            btn.innerText = 'OFF';
-        }
-    }
-
-    function changeVolume(id, val) {
-        audioElements[id].volume = val;
-    }
-
-    function stopAllSounds() {
-        soundTracks.forEach(track => {
-            const audio = audioElements[track.id];
-            audio.pause();
-            audio.currentTime = 0;
-            const btn = document.getElementById('btn-' + track.id);
-            if(btn) {
-                btn.classList.remove('active');
-                btn.innerText = 'OFF';
-            }
-        });
-    }
-</script>
-
-</body>
-</html>
+                if (!is
