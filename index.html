@@ -654,4 +654,119 @@
                     document.getElementById('sourceInfo').innerText = "휴식 임박 (2초 전)";
                 }
 
-                if (!is
+                if (!isBreakTime) {
+                    accumulatedStudySeconds++;
+                    updateCharacterProgress();
+                }
+            } else {
+                stopTimer();
+                
+                if (isBreakTime) {
+                    alert("휴식 시간이 종료되었습니다! 집중 공부 모드로 전환합니다.");
+                    setTimer(30, false);
+                    startTimer();
+                } else {
+                    alert("공부 시간이 종료되었습니다! 수고하셨습니다.");
+                }
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+
+    function updateCharacterProgress() {
+        const totalMinutes = Math.floor(accumulatedStudySeconds / 60);
+        document.getElementById('totalStudyText').innerText = `누적 공부: ${totalMinutes}분`;
+
+        const progressPercent = Math.min((totalMinutes % 60) / 60 * 100, 100);
+        document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+        let level = Math.floor(totalMinutes / 60) + 1;
+        document.getElementById('levelText').innerText = `성장 단계: Lv.${level} 수련생`;
+    }
+
+    /* ASMR 10가지 트랙 (왁뿌볼 포함) */
+    const soundTracks = [
+        { id: 'birds', name: '새소리 🐦', file: 'birds.mp3' },
+        { id: 'crickets', name: '귀뚜라미 🦗', file: 'crickets.mp3' },
+        { id: 'fire', name: '모닥불 🪵', file: 'fire.mp3' },
+        { id: 'keyboard', name: '키보드 ⌨️', file: 'keyboard.mp3' },
+        { id: 'rain', name: '비 오는 소리 🌧️', file: 'rain.mp3' },
+        { id: 'singingbowl', name: '싱잉볼 🔔', file: 'singingbowl.mp3' },
+        { id: 'thunder', name: '천둥 번개 ⚡', file: 'thunder.mp3' },
+        { id: 'waves', name: '파도 소리 🌊', file: 'waves.mp3' },
+        { id: 'wind', name: '바람 소리 🌬️', file: 'wind.mp3' },
+        { id: 'wax', name: '왁뿌볼 🔮', file: 'wax.mp3' }
+    ];
+
+    const audioElements = {};
+
+    function initAsmrMixer() {
+        const mixerBox = document.getElementById('mixerBox');
+        mixerBox.innerHTML = "";
+        
+        soundTracks.forEach(track => {
+            const audio = new Audio(track.file);
+            audio.loop = true;
+            audio.volume = 0.5;
+            audioElements[track.id] = audio;
+
+            const row = document.createElement('div');
+            row.className = 'sound-row';
+            row.innerHTML = `
+                <div class="sound-info">
+                    <button class="toggle-btn" id="btn-${track.id}" onclick="toggleSound('${track.id}')">OFF</button>
+                    <span>${track.name}</span>
+                </div>
+                <input type="range" id="vol-${track.id}" min="0" max="1" step="0.01" value="0.5" oninput="changeVolume('${track.id}', this.value)">
+            `;
+            mixerBox.appendChild(row);
+        });
+    }
+
+    function toggleAsmrPanel() {
+        const modal = document.getElementById('asmrModal');
+        modal.classList.toggle('active');
+    }
+
+    function toggleSound(id) {
+        const audio = audioElements[id];
+        const btn = document.getElementById('btn-' + id);
+
+        if (audio.paused) {
+            audio.play().then(() => {
+                btn.classList.add('active');
+                btn.innerText = 'ON';
+            }).catch(e => {
+                alert("음원 파일을 찾을 수 없거나 재생이 차단되었습니다.");
+            });
+        } else {
+            audio.pause();
+            btn.classList.remove('active');
+            btn.innerText = 'OFF';
+        }
+    }
+
+    function changeVolume(id, val) {
+        audioElements[id].volume = val;
+    }
+
+    function stopAllSounds() {
+        soundTracks.forEach(track => {
+            const audio = audioElements[track.id];
+            audio.pause();
+            audio.currentTime = 0;
+            const btn = document.getElementById('btn-' + track.id);
+            if(btn) {
+                btn.classList.remove('active');
+                btn.innerText = 'OFF';
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
