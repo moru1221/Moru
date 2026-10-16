@@ -21,8 +21,10 @@
         .mode-badge.easteregg { background: rgb(255, 0, 255); }
         .sub-text { color: #8b949e; font-size: 11px; }
         .video-box { width: 100%; aspect-ratio: 16 / 9; background: #000000; border-radius: 10px; overflow: hidden; position: relative; }
-        video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; background: #000000; opacity: 0; transition: opacity 0.2s ease-in-out; }
+        
+        video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; background: #000000; opacity: 0; transition: opacity 0.15s ease-in-out; }
         video.active { opacity: 1; }
+
         .status-card { background: #21262d; border-radius: 14px; padding: 15px; border: 1px solid #30363d; text-align: center; }
         .status-quote { color: #8b949e; font-size: 12px; margin-bottom: 8px; }
         .progress-bar-bg { background: #30363d; border-radius: 10px; height: 8px; width: 100%; overflow: hidden; margin-bottom: 8px; }
@@ -151,26 +153,39 @@
             breakStage = 2;
             let cur = activeVid === 1 ? v2 : v1;
             cur.pause();
-            cur.currentTime = cur.duration; // 마지막 프레임 고정
+            cur.currentTime = cur.duration; // 3번 영상 마지막 프레임 고정
+
+            // 2초 동안 마지막 프레임 상태를 자연스럽게 유지한 뒤 4번 영상으로 전환
             setTimeout(() => {
                 if (isBreakTime && breakStage === 2) {
                     breakStage = 3;
                     playVideo('study_4.mp4', true, true, "휴식 영상 (반복)");
                 }
-            }, 2000); // 2초 유지 후 4번 재생
+            }, 2000);
         }
     }
 
     function playVideo(filename, loop, muted, infoText) {
         let cur = activeVid === 1 ? v1 : v2, nxt = activeVid === 1 ? v2 : v1;
-        cur.pause(); cur.currentTime = 0;
-        nxt.loop = loop; nxt.muted = muted; nxt.src = filename; nxt.load();
-        nxt.play().then(() => {
-            nxt.classList.add('active');
-            cur.classList.remove('active');
-            activeVid = activeVid === 1 ? 2 : 1;
-            document.getElementById('sourceInfo').innerText = infoText;
-        }).catch(e => console.log("대기중:", e));
+
+        nxt.pause();
+        nxt.currentTime = 0;
+        nxt.loop = loop;
+        nxt.muted = muted;
+        nxt.src = filename;
+        nxt.load();
+
+        // 4번 영상이 완전히 준비(캔버스 렌더링 완료)되었을 때만 화면에 부드럽게 노출하여 첫 부분 튐 현상 원천 차단
+        nxt.onloadeddata = () => {
+            nxt.onloadeddata = null;
+            nxt.play().then(() => {
+                nxt.classList.add('active');
+                cur.classList.remove('active');
+                cur.pause();
+                activeVid = activeVid === 1 ? 2 : 1;
+                document.getElementById('sourceInfo').innerText = infoText;
+            }).catch(e => console.log("재생 대기중:", e));
+        };
     }
 
     function updateDisplay() {
@@ -265,7 +280,6 @@
         document.getElementById('levelText').innerText = `Lv.${Math.floor(mins / 60) + 1} 수련생`;
     }
 
-    /* ASMR 믹서 최적화 */
     const tracks = [
         { id: 'birds', name: '새소리 🐦', file: 'birds.mp3' }, { id: 'crickets', name: '귀뚜라미 🦗', file: 'crickets.mp3' },
         { id: 'fire', name: '모닥불 🪵', file: 'fire.mp3' }, { id: 'keyboard', name: '키보드 ⌨️', file: 'keyboard.mp3' },
@@ -290,7 +304,7 @@
     function toggleSound(id) {
         const a = audios[id], btn = document.getElementById('btn-' + id);
         if (a.paused) {
-            a.play().then(() => { btn.classList.add('active'); btn.innerText = 'ON'; }).catch(() => alert("재생 차단됨"));
+            a.play().then(() => { btn.classList.add('active'); btn.innerText = 'ON'; }).catch(() => alert("재생 준비 중"));
         } else {
             a.pause(); btn.classList.remove('active'); btn.innerText = 'OFF';
         }
