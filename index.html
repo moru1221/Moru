@@ -420,7 +420,6 @@
                         font-weight: bold;
                         color: #c9d1d9;
                     }
-                    /* 토글 스위치 버튼 스타일 */
                     .toggle-btn {
                         background: #30363d;
                         color: #8b949e;
@@ -436,7 +435,6 @@
                         background: #2ea043;
                         color: white;
                     }
-                    /* 볼륨 슬라이더 스타일 */
                     input[type=range] {
                         flex: 1;
                         margin-left: 15px;
@@ -453,7 +451,7 @@
                         font-size: 13px;
                         cursor: pointer;
                         width: 100%;
-                        margin-top: 5px;
+                        margin-top: 15px;
                     }
                     .all-stop-btn:hover { background: #c5302c; }
                 </style>
@@ -469,15 +467,15 @@
                 <button class="all-stop-btn" onclick="stopAllSounds()">모든 소리 끄기 ⏹️</button>
 
                 <script>
-                    // 10가지 ASMR 사운드 리스트 (한국어 이름 + 파일명)
+                    // 10가지 ASMR 사운드 트랙 (카페와 싱잉볼 파일명 매칭 완벽 보정)
                     const soundTracks = [
                         { id: 'birds', name: '새소리 🐦', file: 'birds.mp3' },
-                        { id: 'coffee', name: '카페 소음 ☕', file: 'coffee.mp3' },
+                        { id: 'coffee', name: '카페 소음 ☕', file: 'Coffee shop.mp3' },
                         { id: 'crickets', name: '귀뚜라미 🦗', file: 'crickets.mp3' },
                         { id: 'fire', name: '모닥불 🪵', file: 'fire.mp3' },
                         { id: 'keyboard', name: '키보드 ⌨️', file: 'keyboard.mp3' },
                         { id: 'rain', name: '비 오는 소리 🌧️', file: 'rain.mp3' },
-                        { id: 'singingbowl', name: '싱잉볼 🔔', file: 'singingbowl.mp3' },
+                        { id: 'singingbowl', name: '싱잉볼 🔔', file: 'Singing Bowl.mp3' },
                         { id: 'thunder', name: '천둥 번개 ⚡', file: 'thunder.mp3' },
                         { id: 'waves', name: '파도 소리 🌊', file: 'waves.mp3' },
                         { id: 'wind', name: '바람 소리 🌬️', file: 'wind.mp3' }
@@ -486,15 +484,12 @@
                     const audioElements = {};
                     const mixerBox = document.getElementById('mixerBox');
 
-                    // 채널별 오디오 및 UI 생성
                     soundTracks.forEach(track => {
-                        // 오디오 객체 생성 (루프 설정)
                         const audio = new Audio(track.file);
                         audio.loop = true;
-                        audio.volume = 0.5; // 기본 볼륨 50%
+                        audio.volume = 0.5;
                         audioElements[track.id] = audio;
 
-                        // HTML UI 구성
                         const row = document.createElement('div');
                         row.className = 'sound-row';
                         row.innerHTML = \`
@@ -507,7 +502,6 @@
                         mixerBox.appendChild(row);
                     });
 
-                    // 사운드 켜기/끄기 토글
                     function toggleSound(id) {
                         const audio = audioElements[id];
                         const btn = document.getElementById('btn-' + id);
@@ -526,12 +520,10 @@
                         }
                     }
 
-                    // 볼륨 조절
                     function changeVolume(id, val) {
                         audioElements[id].volume = val;
                     }
 
-                    // 모든 소리 일괄 정지
                     function stopAllSounds() {
                         soundTracks.forEach(track => {
                             const audio = audioElements[track.id];
@@ -548,7 +540,6 @@
         `);
     }
 
-    // 메인 타이머 종료 또는 정지 시 팝업창의 모든 ASMR 사운드 정지
     function stopMainAsmr() {
         if (asmrWindow && !asmrWindow.closed) {
             try {
