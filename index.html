@@ -10,409 +10,67 @@
     <meta property="og:type" content="website">
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0d1117;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 15px;
-        }
-        .main-container {
-            display: flex;
-            background: #161b22;
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.6);
-            gap: 20px;
-            width: 100%;
-            max-width: 850px;
-            border: 1px solid #30363d;
-            position: relative;
-        }
-        .left-panel {
-            flex: 1.1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .video-card {
-            background: #21262d;
-            border-radius: 14px;
-            padding: 15px;
-            border: 1px solid #30363d;
-            position: relative;
-        }
-        .video-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .mode-badge {
-            background: #2ea043;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .mode-badge.break {
-            background: #bb8009;
-        }
-        .mode-badge.easteregg {
-            background: rgb(255, 0, 255);
-        }
-        .sub-text {
-            color: #8b949e;
-            font-size: 11px;
-        }
-        .video-box {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background: #000000;
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-        video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            background: #000000;
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out;
-        }
-        video.active {
-            opacity: 1;
-        }
-        .status-card {
-            background: #21262d;
-            border-radius: 14px;
-            padding: 15px;
-            border: 1px solid #30363d;
-            text-align: center;
-        }
-        .status-quote {
-            color: #8b949e;
-            font-size: 12px;
-            margin-bottom: 8px;
-        }
-        .progress-bar-bg {
-            background: #30363d;
-            border-radius: 10px;
-            height: 8px;
-            width: 100%;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-        .progress-bar-fill {
-            background: #2ea043;
-            height: 100%;
-            width: 0%;
-            transition: width 0.4s ease;
-        }
-        .status-footer {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: #c9d1d9;
-        }
-        .right-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .panel-top-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-        .panel-title h2 {
-            font-size: 20px;
-            margin-bottom: 4px;
-            color: #f0f6fc;
-        }
-        .panel-title p {
-            color: #8b949e;
-            font-size: 12px;
-        }
-        .asmr-btn {
-            background-color: rgb(255, 0, 255);
-            color: #ffffff;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 12px;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(255, 0, 255, 0.4);
-            transition: opacity 0.2s;
-        }
-        .asmr-btn:hover {
-            opacity: 0.85;
-        }
-        .timer-card {
-            background: #21262d;
-            border-radius: 14px;
-            padding: 20px 15px;
-            text-align: center;
-            border: 1px solid #30363d;
-            margin: 15px 0;
-        }
-        .timer-mode-label {
-            color: #2ea043;
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-        #display {
-            font-size: 36px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            color: #ffffff;
-            margin-bottom: 6px;
-        }
-        .timer-sub {
-            color: #8b949e;
-            font-size: 11px;
-        }
-        .preset-buttons {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 8px;
-        }
-        .preset-buttons button {
-            flex: 1;
-            padding: 8px 0;
-            background: #21262d;
-            border: 1px solid #30363d;
-            color: #c9d1d9;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .preset-buttons button:hover {
-            background: #30363d;
-            color: #fff;
-        }
-        .break-preset {
-            color: #bb8009 !important;
-        }
-        .custom-input-box {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 15px;
-        }
-        .custom-input-row {
-            display: flex;
-            gap: 6px;
-        }
-        .custom-input-row input {
-            flex: 1;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 8px;
-            color: white;
-            font-size: 13px;
-            text-align: center;
-            outline: none;
-        }
-        .custom-input-row button {
-            padding: 0 12px;
-            background: #21262d;
-            border: 1px solid #30363d;
-            color: #c9d1d9;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .checkbox-label {
-            font-size: 12px;
-            color: #8b949e;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            padding-left: 2px;
-        }
-        .checkbox-label input {
-            accent-color: #bb8009;
-            cursor: pointer;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        .action-buttons button {
-            flex: 1;
-            padding: 10px;
-            border-radius: 8px;
-            border: none;
-            font-weight: bold;
-            font-size: 13px;
-            cursor: pointer;
-        }
-        .btn-start {
-            background: #2ea043;
-            color: white;
-        }
-        .btn-stop {
-            background: #da3633;
-            color: white;
-        }
-
-        /* ASMR 패널 오버레이 */
-        .asmr-modal {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(13, 17, 23, 0.95);
-            backdrop-filter: blur(5px);
-            border-radius: 20px;
-            z-index: 100;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-        }
-        .asmr-modal.active {
-            display: flex;
-        }
-        .asmr-modal h3 {
-            color: rgb(255, 0, 255);
-            margin-bottom: 3px;
-            font-size: 19px;
-        }
-        .asmr-modal p {
-            color: #8b949e;
-            font-size: 11px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        .mixer-container {
-            background: #161b22;
-            border: 1px solid #30363d;
-            padding: 10px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 420px;
-            max-height: 350px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-        .sound-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #21262d;
-            padding: 6px 10px;
-            border-radius: 8px;
-            border: 1px solid #30363d;
-        }
-        .sound-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            width: 130px;
-        }
-        .sound-info span {
-            font-size: 12px;
-            font-weight: bold;
-            color: #c9d1d9;
-        }
-        .toggle-btn {
-            background: #30363d;
-            color: #8b949e;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .toggle-btn.active {
-            background: #2ea043;
-            color: white;
-        }
-        input[type=range] {
-            flex: 1;
-            margin-left: 10px;
-            height: 6px;
-            accent-color: #2ea043;
-            cursor: pointer;
-        }
-        .asmr-bottom-btns {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-            max-width: 420px;
-        }
-        .asmr-close-btn {
-            background: #2ea043;
-            color: white;
-            border: none;
-            padding: 9px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 12px;
-            cursor: pointer;
-            flex: 1;
-        }
-        .asmr-all-stop {
-            background: #da3633;
-            color: white;
-            border: none;
-            padding: 9px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 12px;
-            cursor: pointer;
-            flex: 1;
-        }
-
-        @media (max-width: 768px) {
-            .main-container {
-                flex-direction: column;
-                padding: 15px;
-                gap: 15px;
-            }
-            .video-box {
-                height: 200px;
-            }
-            #display {
-                font-size: 38px;
-            }
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1117; color: #ffffff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 15px; }
+        .main-container { display: flex; background: #161b22; padding: 20px; border-radius: 20px; box-shadow: 0 12px 30px rgba(0,0,0,0.6); gap: 20px; width: 100%; max-width: 850px; border: 1px solid #30363d; position: relative; }
+        .left-panel { flex: 1.1; display: flex; flex-direction: column; gap: 15px; }
+        .video-card { background: #21262d; border-radius: 14px; padding: 15px; border: 1px solid #30363d; position: relative; }
+        .video-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .mode-badge { background: #2ea043; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .mode-badge.break { background: #bb8009; }
+        .mode-badge.easteregg { background: rgb(255, 0, 255); }
+        .sub-text { color: #8b949e; font-size: 11px; }
+        .video-box { width: 100%; aspect-ratio: 16 / 9; background: #000000; border-radius: 10px; overflow: hidden; position: relative; }
+        video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; background: #000000; opacity: 0; transition: opacity 0.2s ease-in-out; }
+        video.active { opacity: 1; }
+        .status-card { background: #21262d; border-radius: 14px; padding: 15px; border: 1px solid #30363d; text-align: center; }
+        .status-quote { color: #8b949e; font-size: 12px; margin-bottom: 8px; }
+        .progress-bar-bg { background: #30363d; border-radius: 10px; height: 8px; width: 100%; overflow: hidden; margin-bottom: 8px; }
+        .progress-bar-fill { background: #2ea043; height: 100%; width: 0%; transition: width 0.4s ease; }
+        .status-footer { display: flex; justify-content: space-between; font-size: 11px; color: #c9d1d9; }
+        .right-panel { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .panel-top-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .panel-title h2 { font-size: 20px; margin-bottom: 4px; color: #f0f6fc; }
+        .panel-title p { color: #8b949e; font-size: 12px; }
+        .asmr-btn { background-color: rgb(255, 0, 255); color: #ffffff; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 2px 6px rgba(255, 0, 255, 0.4); }
+        .timer-card { background: #21262d; border-radius: 14px; padding: 20px 15px; text-align: center; border: 1px solid #30363d; margin: 15px 0; }
+        .timer-mode-label { color: #2ea043; font-size: 13px; font-weight: bold; margin-bottom: 6px; }
+        #display { font-size: 36px; font-weight: bold; letter-spacing: 2px; color: #ffffff; margin-bottom: 6px; }
+        .timer-sub { color: #8b949e; font-size: 11px; }
+        .preset-buttons { display: flex; gap: 6px; margin-bottom: 8px; }
+        .preset-buttons button { flex: 1; padding: 8px 0; background: #21262d; border: 1px solid #30363d; color: #c9d1d9; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .break-preset { color: #bb8009 !important; }
+        .custom-input-box { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; }
+        .custom-input-row { display: flex; gap: 6px; }
+        .custom-input-row input { flex: 1; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 8px; color: white; font-size: 13px; text-align: center; outline: none; }
+        .custom-input-row button { padding: 0 12px; background: #21262d; border: 1px solid #30363d; color: #c9d1d9; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .checkbox-label { font-size: 12px; color: #8b949e; display: flex; align-items: center; gap: 6px; cursor: pointer; padding-left: 2px; }
+        .checkbox-label input { accent-color: #bb8009; cursor: pointer; }
+        .action-buttons { display: flex; gap: 8px; }
+        .action-buttons button { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .btn-start { background: #2ea043; color: white; }
+        .btn-stop { background: #da3633; color: white; }
+        .asmr-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(5px); border-radius: 20px; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 15px; }
+        .asmr-modal.active { display: flex; }
+        .asmr-modal h3 { color: rgb(255, 0, 255); margin-bottom: 3px; font-size: 19px; }
+        .asmr-modal p { color: #8b949e; font-size: 11px; margin-bottom: 10px; text-align: center; }
+        .mixer-container { background: #161b22; border: 1px solid #30363d; padding: 10px; border-radius: 12px; width: 100%; max-width: 420px; max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+        .sound-row { display: flex; align-items: center; justify-content: space-between; background: #21262d; padding: 6px 10px; border-radius: 8px; border: 1px solid #30363d; }
+        .sound-info { display: flex; align-items: center; gap: 8px; width: 130px; }
+        .sound-info span { font-size: 12px; font-weight: bold; color: #c9d1d9; }
+        .toggle-btn { background: #30363d; color: #8b949e; border: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .toggle-btn.active { background: #2ea043; color: white; }
+        input[type=range] { flex: 1; margin-left: 10px; height: 6px; accent-color: #2ea043; cursor: pointer; }
+        .asmr-bottom-btns { display: flex; gap: 8px; width: 100%; max-width: 420px; }
+        .asmr-close-btn, .asmr-all-stop { border: none; padding: 9px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; flex: 1; color: white; }
+        .asmr-close-btn { background: #2ea043; }
+        .asmr-all-stop { background: #da3633; }
+        @media (max-width: 768px) { .main-container { flex-direction: column; padding: 15px; gap: 15px; } .video-box { height: 200px; } #display { font-size: 38px; } }
     </style>
 </head>
 <body>
 
 <div class="main-container">
-    <!-- ASMR 패널 오버레이 -->
     <div id="asmrModal" class="asmr-modal">
         <h3>🎧 ASMR 사운드 믹서</h3>
         <p>백그라운드에서 계속 재생됩니다.</p>
@@ -423,7 +81,6 @@
         </div>
     </div>
 
-    <!-- 왼쪽 영역: 영상 및 캐릭터 상태 -->
     <div class="left-panel">
         <div class="video-card">
             <div class="video-header">
@@ -435,20 +92,13 @@
                 <video id="vid2" autoplay playsinline></video>
             </div>
         </div>
-
         <div class="status-card">
             <div class="status-quote">"캐릭터가 성장해요!"</div>
-            <div class="progress-bar-bg">
-                <div id="progressBar" class="progress-bar-fill" style="width: 0%;"></div>
-            </div>
-            <div class="status-footer">
-                <span id="totalStudyText">누적: 0분</span>
-                <span id="levelText">Lv.1 연습생</span>
-            </div>
+            <div class="progress-bar-bg"><div id="progressBar" class="progress-bar-fill" style="width: 0%;"></div></div>
+            <div class="status-footer"><span id="totalStudyText">누적: 0분</span><span id="levelText">Lv.1 연습생</span></div>
         </div>
     </div>
 
-    <!-- 오른쪽 영역: 타이머 컨트롤 -->
     <div class="right-panel">
         <div>
             <div class="panel-top-header">
@@ -458,30 +108,24 @@
                 </div>
                 <button class="asmr-btn" onclick="toggleAsmrPanel()">ASMR</button>
             </div>
-
             <div class="timer-card">
                 <div id="timerModeLabel" class="timer-mode-label">집중 공부 모드</div>
                 <div id="display">00:30:00</div>
                 <div class="timer-sub">목표를 향해 달려보세요!</div>
             </div>
-
             <div class="preset-buttons">
                 <button onclick="setTimer(30, false)">30분 집중</button>
                 <button onclick="setTimer(60, false)">1시간 집중</button>
                 <button class="break-preset" onclick="setTimer(10, true)">10분 휴식</button>
             </div>
-
             <div class="custom-input-box">
                 <div class="custom-input-row">
                     <input type="text" id="customMinutes" placeholder="직접 입력 (분)" autocomplete="off">
                     <button onclick="setCustomTimer()">설정</button>
                 </div>
-                <label class="checkbox-label">
-                    <input type="checkbox" id="breakModeCheckbox"> 휴식 시간으로 설정하기
-                </label>
+                <label class="checkbox-label"><input type="checkbox" id="breakModeCheckbox"> 휴식 시간으로 설정하기</label>
             </div>
         </div>
-
         <div class="action-buttons">
             <button class="btn-start" onclick="startTimer()">시작</button>
             <button class="btn-stop" onclick="stopTimer()">초기화</button>
@@ -491,312 +135,174 @@
 
 <script>
     const studyVideos = ['study_1.mp4', 'study_2.mp4'];
-    
-    let totalSeconds = 30 * 60;
-    let timerInterval = null;
-    let isBreakTime = false;
-    let isEasterEggMode = false;
-    let accumulatedStudySeconds = 0;
+    let totalSeconds = 30 * 60, timerInterval = null, isBreakTime = false, isEasterEggMode = false, accumulatedStudySeconds = 0, breakStage = 0, activeVid = 1;
+    const v1 = document.getElementById('vid1'), v2 = document.getElementById('vid2');
 
-    let breakVideoStage = 0; // 0: 평상시, 1: study_3 재생 중, 2: 마지막 프레임 2초 유지 중, 3: study_4 반복 재생 중, 4: study_5 임박 재생 중
+    window.onload = () => { playVideo(studyVideos[0], false, true, "집중 영상 1"); updateDisplay(); initAsmr(); };
 
-    let activeVidIndex = 1;
-    const v1 = document.getElementById('vid1');
-    const v2 = document.getElementById('vid2');
-
-    window.onload = () => {
-        playRandomStudyVideo();
-        updateDisplay();
-        initAsmrMixer();
-    };
-
-    v1.addEventListener('ended', handleVideoEnd);
-    v2.addEventListener('ended', handleVideoEnd);
+    v1.onended = handleVideoEnd;
+    v2.onended = handleVideoEnd;
 
     function handleVideoEnd() {
         if (isEasterEggMode) return;
-
         if (!isBreakTime) {
-            playRandomStudyVideo();
-        } else {
-            // study_3.mp4가 끝나면 그 마지막 화면(프레임)을 그대로 화면에 고정(유지)한 채 2초 동안 멈춰 있음
-            if (breakVideoStage === 1) {
-                breakVideoStage = 2; // 대기 상태 (마지막 프레임 유지)
-                
-                let currentVid = (activeVidIndex === 1) ? v2 : v1; // 현재 끝난 영상 비디오 태그
-                currentVid.pause();
-                // 끝난 위치(마지막 프레임)에 고정되도록 설정
-                currentVid.currentTime = currentVid.duration;
-
-                document.getElementById('sourceInfo').innerText = "휴식 유지 중 (2초)";
-
-                setTimeout(() => {
-                    if (isBreakTime && breakVideoStage === 2) {
-                        breakVideoStage = 3; // study_4 재생 단계
-                        playSpecificVideo('study_4.mp4', true, true);
-                        document.getElementById('sourceInfo').innerText = "휴식 영상 (반복)";
-                    }
-                }, 2000); // 마지막 프레임 상태로 정확히 2초 유지
-
-            } else if (breakVideoStage === 3) {
-                playSpecificVideo('study_4.mp4', true, true);
-            }
+            playVideo(studyVideos[Math.floor(Math.random() * studyVideos.length)], false, true, "집중 영상");
+        } else if (breakStage === 1) {
+            breakStage = 2;
+            let cur = activeVid === 1 ? v2 : v1;
+            cur.pause();
+            cur.currentTime = cur.duration; // 마지막 프레임 고정
+            setTimeout(() => {
+                if (isBreakTime && breakStage === 2) {
+                    breakStage = 3;
+                    playVideo('study_4.mp4', true, true, "휴식 영상 (반복)");
+                }
+            }, 2000); // 2초 유지 후 4번 재생
         }
     }
 
-    function playRandomStudyVideo() {
-        if (isEasterEggMode) return;
-        playSpecificVideo(studyVideos[Math.floor(Math.random() * studyVideos.length)], false, true);
-    }
-
-    function playSpecificVideo(filename, loop, muted) {
-        let currentVid = (activeVidIndex === 1) ? v1 : v2;
-        let nextVid = (activeVidIndex === 1) ? v2 : v1;
-
-        currentVid.pause();
-        currentVid.currentTime = 0;
-        currentVid.muted = true;
-
-        nextVid.loop = loop;
-        nextVid.muted = muted;
-        nextVid.src = filename;
-        nextVid.load();
-        
-        nextVid.play().then(() => {
-            nextVid.classList.add('active');
-            currentVid.classList.remove('active');
-            activeVidIndex = (activeVidIndex === 1) ? 2 : 1;
-        }).catch(e => {
-            console.log("자동재생 대기중:", e);
-        });
+    function playVideo(filename, loop, muted, infoText) {
+        let cur = activeVid === 1 ? v1 : v2, nxt = activeVid === 1 ? v2 : v1;
+        cur.pause(); cur.currentTime = 0;
+        nxt.loop = loop; nxt.muted = muted; nxt.src = filename; nxt.load();
+        nxt.play().then(() => {
+            nxt.classList.add('active');
+            cur.classList.remove('active');
+            activeVid = activeVid === 1 ? 2 : 1;
+            document.getElementById('sourceInfo').innerText = infoText;
+        }).catch(e => console.log("대기중:", e));
     }
 
     function updateDisplay() {
-        const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-        const seconds = String(totalSeconds % 60).padStart(2, '0');
-        document.getElementById('display').innerText = `${hours}:${minutes}:${seconds}`;
+        const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+        const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+        const s = String(totalSeconds % 60).padStart(2, '0');
+        document.getElementById('display').innerText = `${h}:${m}:${s}`;
     }
 
     function setCustomTimer() {
-        const inputElem = document.getElementById('customMinutes');
-        const checkboxElem = document.getElementById('breakModeCheckbox');
-        
-        if (!inputElem || !checkboxElem) return;
+        const val = document.getElementById('customMinutes').value.trim();
+        const isBreak = document.getElementById('breakModeCheckbox').checked;
 
-        const inputVal = inputElem.value.trim();
-        const isBreakChecked = checkboxElem.checked;
-
-        if (isBreakChecked && inputVal === '120') {
-            if (window.confirm("너 정말 이만큼 쉴꺼야?")) {
-                triggerEasterEgg('video_0824.mp4', 120, "120 시크릿 휴식");
-            }
+        if (isBreak && val === '120') {
+            if (window.confirm("너 정말 이만큼 쉴꺼야?")) triggerEasterEgg('video_0824.mp4', 120, "120 시크릿 휴식");
             return;
         }
-
-        if (isBreakChecked && inputVal === '60') {
+        if (isBreak && val === '60') {
             triggerEasterEgg('video_60.mp4', 60, "60분 시크릿 휴식");
             return;
         }
 
-        const mins = parseInt(inputVal);
-        if (isNaN(mins) || mins <= 0) {
-            alert("올바른 분(Minute)을 입력하세요.");
-            return;
-        }
-        setTimer(mins, isBreakChecked);
+        const mins = parseInt(val);
+        if (isNaN(mins) || mins <= 0) { alert("올바른 분을 입력하세요."); return; }
+        setTimer(mins, isBreak);
     }
 
-    function setTimer(minutes, breakMode) {
-        stopTimer();
-        isEasterEggMode = false;
-        totalSeconds = minutes * 60;
-        isBreakTime = breakMode;
-        breakVideoStage = 0;
-
-        const badge = document.getElementById('modeBadge');
-        const timerLabel = document.getElementById('timerModeLabel');
+    function setTimer(mins, breakMode) {
+        stopTimer(); isEasterEggMode = false; totalSeconds = mins * 60; isBreakTime = breakMode; breakStage = 0;
+        const badge = document.getElementById('modeBadge'), label = document.getElementById('timerModeLabel');
 
         if (isBreakTime) {
-            badge.innerText = "휴식 시간 모드";
-            badge.className = "mode-badge break";
-            timerLabel.innerText = "휴식 시간";
-            timerLabel.style.color = "#bb8009";
-            
-            breakVideoStage = 1;
-            playSpecificVideo('study_3.mp4', false, true);
-            document.getElementById('sourceInfo').innerText = "휴식 영상 (시작)";
+            badge.innerText = "휴식 시간 모드"; badge.className = "mode-badge break";
+            label.innerText = "휴식 시간"; label.style.color = "#bb8009";
+            breakStage = 1;
+            playVideo('study_3.mp4', false, true, "휴식 영상 (시작)");
         } else {
-            badge.innerText = "집중 공부 모드";
-            badge.className = "mode-badge";
-            timerLabel.innerText = "집중 공부 모드";
-            timerLabel.style.color = "#2ea043";
-            playRandomStudyVideo();
+            badge.innerText = "집중 공부 모드"; badge.className = "mode-badge";
+            label.innerText = "집중 공부 모드"; label.style.color = "#2ea043";
+            playVideo(studyVideos[0], false, true, "집중 영상 1");
         }
         updateDisplay();
     }
 
-    function triggerEasterEgg(videoFilename, durationMins, labelText) {
-        stopTimer();
-        isEasterEggMode = true;
-        isBreakTime = true;
-        totalSeconds = durationMins * 60;
-
-        stopAllSounds();
-
-        const badge = document.getElementById('modeBadge');
-        const timerLabel = document.getElementById('timerModeLabel');
-
-        badge.innerText = "시크릿 휴식 모드";
-        badge.className = "mode-badge easteregg";
-        timerLabel.innerText = labelText;
-        timerLabel.style.color = "rgb(255, 0, 255)";
-
-        playSpecificVideo(videoFilename, false, false);
-        document.getElementById('sourceInfo').innerText = "시크릿 영상 재생 중";
+    function triggerEasterEgg(filename, mins, text) {
+        stopTimer(); isEasterEggMode = true; isBreakTime = true; totalSeconds = mins * 60; stopAllSounds();
+        document.getElementById('modeBadge').innerText = "시크릿 휴식 모드";
+        document.getElementById('modeBadge').className = "mode-badge easteregg";
+        const label = document.getElementById('timerModeLabel');
+        label.innerText = text; label.style.color = "rgb(255, 0, 255)";
+        playVideo(filename, false, false, "시크릿 영상 재생 중");
         updateDisplay();
     }
 
     function startTimer() {
         if (timerInterval || totalSeconds <= 0) return;
-        
-        if (isBreakTime && !isEasterEggMode && breakVideoStage === 0) {
-            breakVideoStage = 1;
-            playSpecificVideo('study_3.mp4', false, true);
-            document.getElementById('sourceInfo').innerText = "휴식 영상 (시작)";
+        if (isBreakTime && !isEasterEggMode && breakStage === 0) {
+            breakStage = 1;
+            playVideo('study_3.mp4', false, true, "휴식 영상 (시작)");
         }
-
         timerInterval = setInterval(() => {
             if (totalSeconds > 0) {
                 totalSeconds--;
                 updateDisplay();
-
-                // 휴식 종료 2초 전 study_5.mp4로 전환 (stage 4)
-                if (isBreakTime && !isEasterEggMode && totalSeconds === 2 && breakVideoStage < 4) {
-                    breakVideoStage = 4;
-                    playSpecificVideo('study_5.mp4', false, true);
-                    document.getElementById('sourceInfo').innerText = "휴식 임박 (2초 전)";
+                if (isBreakTime && !isEasterEggMode && totalSeconds === 2 && breakStage < 4) {
+                    breakStage = 4;
+                    playVideo('study_5.mp4', false, true, "휴식 임박 (2초 전)");
                 }
-
                 if (!isBreakTime) {
                     accumulatedStudySeconds++;
-                    updateCharacterProgress();
+                    updateProgress();
                 }
             } else {
                 stopTimer();
-                
                 if (isBreakTime) {
-                    alert("휴식 시간이 종료되었습니다! 집중 공부 모드로 전환합니다.");
+                    alert("휴식 종료! 집중 모드로 전환합니다.");
                     setTimer(30, false);
                     startTimer();
                 } else {
-                    alert("공부 시간이 종료되었습니다! 수고하셨습니다.");
+                    alert("공부 시간이 종료되었습니다!");
                 }
             }
         }, 1000);
     }
 
-    function stopTimer() {
-        clearInterval(timerInterval);
-        timerInterval = null;
+    function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
+
+    function updateProgress() {
+        const mins = Math.floor(accumulatedStudySeconds / 60);
+        document.getElementById('totalStudyText').innerText = `누적: ${mins}분`;
+        document.getElementById('progressBar').style.width = `${Math.min((mins % 60) / 60 * 100, 100)}%`;
+        document.getElementById('levelText').innerText = `Lv.${Math.floor(mins / 60) + 1} 수련생`;
     }
 
-    function updateCharacterProgress() {
-        const totalMinutes = Math.floor(accumulatedStudySeconds / 60);
-        document.getElementById('totalStudyText').innerText = `누적: ${totalMinutes}분`;
-
-        const progressPercent = Math.min((totalMinutes % 60) / 60 * 100, 100);
-        document.getElementById('progressBar').style.width = `${progressPercent}%`;
-
-        let level = Math.floor(totalMinutes / 60) + 1;
-        document.getElementById('levelText').innerText = `Lv.${level} 수련생`;
-    }
-
-    /* ASMR 10가지 트랙 (왁뿌볼 포함) */
-    const soundTracks = [
-        { id: 'birds', name: '새소리 🐦', file: 'birds.mp3' },
-        { id: 'crickets', name: '귀뚜라미 🦗', file: 'crickets.mp3' },
-        { id: 'fire', name: '모닥불 🪵', file: 'fire.mp3' },
-        { id: 'keyboard', name: '키보드 ⌨️', file: 'keyboard.mp3' },
-        { id: 'rain', name: '비 🌧️', file: 'rain.mp3' },
-        { id: 'singingbowl', name: '싱잉볼 🔔', file: 'singingbowl.mp3' },
-        { id: 'thunder', name: '천둥 ⚡', file: 'thunder.mp3' },
-        { id: 'waves', name: '파도 🌊', file: 'waves.mp3' },
-        { id: 'wind', name: '바람 🌬️', file: 'wind.mp3' },
-        { id: 'wax', name: '왁뿌볼 🔮', file: 'wax.mp3' }
+    /* ASMR 믹서 최적화 */
+    const tracks = [
+        { id: 'birds', name: '새소리 🐦', file: 'birds.mp3' }, { id: 'crickets', name: '귀뚜라미 🦗', file: 'crickets.mp3' },
+        { id: 'fire', name: '모닥불 🪵', file: 'fire.mp3' }, { id: 'keyboard', name: '키보드 ⌨️', file: 'keyboard.mp3' },
+        { id: 'rain', name: '비 🌧️', file: 'rain.mp3' }, { id: 'singingbowl', name: '싱잉볼 🔔', file: 'singingbowl.mp3' },
+        { id: 'thunder', name: '천둥 ⚡', file: 'thunder.mp3' }, { id: 'waves', name: '파도 🌊', file: 'waves.mp3' },
+        { id: 'wind', name: '바람 🌬️', file: 'wind.mp3' }, { id: 'wax', name: '왁뿌볼 🔮', file: 'wax.mp3' }
     ];
+    const audios = {};
 
-    const audioElements = {};
-
-    function initAsmrMixer() {
-        const mixerBox = document.getElementById('mixerBox');
-        if (!mixerBox) return;
-        mixerBox.innerHTML = "";
-        
-        soundTracks.forEach(track => {
-            const audio = new Audio(track.file);
-            audio.loop = true;
-            audio.volume = 0.5;
-            audioElements[track.id] = audio;
-
-            const row = document.createElement('div');
-            row.className = 'sound-row';
-            row.innerHTML = `
-                <div class="sound-info">
-                    <button class="toggle-btn" id="btn-${track.id}" onclick="toggleSound('${track.id}')">OFF</button>
-                    <span>${track.name}</span>
-                </div>
-                <input type="range" id="vol-${track.id}" min="0" max="1" step="0.01" value="0.5" oninput="changeVolume('${track.id}', this.value)">
-            `;
-            mixerBox.appendChild(row);
+    function initAsmr() {
+        const box = document.getElementById('mixerBox'); if (!box) return; box.innerHTML = "";
+        tracks.forEach(t => {
+            const a = new Audio(t.file); a.loop = true; a.volume = 0.5; audios[t.id] = a;
+            const row = document.createElement('div'); row.className = 'sound-row';
+            row.innerHTML = `<div class="sound-info"><button class="toggle-btn" id="btn-${t.id}" onclick="toggleSound('${t.id}')">OFF</button><span>${t.name}</span></div><input type="range" min="0" max="1" step="0.01" value="0.5" oninput="audios['${t.id}'].volume=this.value">`;
+            box.appendChild(row);
         });
     }
 
-    function toggleAsmrPanel() {
-        const modal = document.getElementById('asmrModal');
-        if (modal) modal.classList.toggle('active');
-    }
+    function toggleAsmrPanel() { document.getElementById('asmrModal').classList.toggle('active'); }
 
     function toggleSound(id) {
-        const audio = audioElements[id];
-        const btn = document.getElementById('btn-' + id);
-        if (!audio || !btn) return;
-
-        if (audio.paused) {
-            audio.play().then(() => {
-                btn.classList.add('active');
-                btn.innerText = 'ON';
-            }).catch(e => {
-                alert("음원 파일을 찾을 수 없거나 재생이 차단되었습니다.");
-            });
+        const a = audios[id], btn = document.getElementById('btn-' + id);
+        if (a.paused) {
+            a.play().then(() => { btn.classList.add('active'); btn.innerText = 'ON'; }).catch(() => alert("재생 차단됨"));
         } else {
-            audio.pause();
-            btn.classList.remove('active');
-            btn.innerText = 'OFF';
-        }
-    }
-
-    function changeVolume(id, val) {
-        if (audioElements[id]) {
-            audioElements[id].volume = val;
+            a.pause(); btn.classList.remove('active'); btn.innerText = 'OFF';
         }
     }
 
     function stopAllSounds() {
-        soundTracks.forEach(track => {
-            const audio = audioElements[track.id];
-            if (audio) {
-                audio.pause();
-                audio.currentTime = 0;
-            }
-            const btn = document.getElementById('btn-' + track.id);
-            if(btn) {
-                btn.classList.remove('active');
-                btn.innerText = 'OFF';
-            }
+        tracks.forEach(t => {
+            audios[t.id].pause(); audios[t.id].currentTime = 0;
+            const b = document.getElementById('btn-' + t.id);
+            if (b) { b.classList.remove('active'); b.innerText = 'OFF'; }
         });
     }
 </script>
-
 </body>
 </html>
