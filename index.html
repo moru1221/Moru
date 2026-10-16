@@ -270,7 +270,7 @@
             color: white;
         }
 
-        /* 인라인 ASMR 패널 (팝업 대신 메인 화면 내 모달 오버레이 방식) */
+        /* ASMR 패널 오버레이 */
         .asmr-modal {
             position: absolute;
             top: 0;
@@ -404,7 +404,7 @@
 <body>
 
 <div class="main-container">
-    <!-- ASMR 인라인 패널 (팝업 대신 창 내부에서 열리고 닫혀도 소리 유지) -->
+    <!-- ASMR 패널 오버레이 -->
     <div id="asmrModal" class="asmr-modal">
         <h3>🎧 ASMR 사운드 믹서</h3>
         <p>설정창을 닫아도 선택한 소리는 백그라운드에서 계속 재생됩니다.</p>
@@ -487,10 +487,8 @@
     let totalSeconds = 30 * 60;
     let timerInterval = null;
     let isBreakTime = false;
-    let currentMode = 'study';
     let accumulatedStudySeconds = 0;
 
-    // 휴식 모드 영상 제어 상태 (0: 대기, 1: study_3 재생중, 2: study_4 반복, 3: study_5 임박 2초전)
     let breakVideoStage = 0;
 
     let activeVidIndex = 1;
@@ -512,7 +510,7 @@
         } else {
             if (breakVideoStage === 1) {
                 breakVideoStage = 2;
-                playSpecificVideo('study_4.mp4', true); // 반복 재생
+                playSpecificVideo('study_4.mp4', true);
             } else if (breakVideoStage === 2) {
                 playSpecificVideo('study_4.mp4', true);
             } else if (breakVideoStage === 3) {
@@ -614,7 +612,15 @@
                 }
             } else {
                 stopTimer();
-                alert(isBreakTime ? "휴식 시간이 종료되었습니다!" : "공부 시간이 종료되었습니다! 수고하셨습니다.");
+                
+                if (isBreakTime) {
+                    // 휴식 종료 알림창 확인 버튼을 누르면 자동으로 30분 집중 공부 모드로 전환
+                    alert("휴식 시간이 종료되었습니다! 집중 공부 모드로 전환합니다.");
+                    setTimer(30, false); // 30분 집중 모드로 세팅
+                    startTimer();        // 타이머 자동으로 재시작
+                } else {
+                    alert("공부 시간이 종료되었습니다! 수고하셨습니다.");
+                }
             }
         }, 1000);
     }
@@ -635,7 +641,7 @@
         document.getElementById('levelText').innerText = `성장 단계: Lv.${level} 수련생`;
     }
 
-    /* --- ASMR 백그라운드 유지형 믹서 로직 --- */
+    /* ASMR 백그라운드 유지형 믹서 로직 */
     const soundTracks = [
         { id: 'birds', name: '새소리 🐦', file: 'birds.mp3' },
         { id: 'crickets', name: '귀뚜라미 🦗', file: 'crickets.mp3' },
