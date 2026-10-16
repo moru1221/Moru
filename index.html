@@ -182,7 +182,7 @@
         .preset-buttons {
             display: flex;
             gap: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .preset-buttons button {
             flex: 1;
@@ -200,12 +200,20 @@
             background: #30363d;
             color: #fff;
         }
+        .break-preset {
+            color: #bb8009 !important;
+        }
         .custom-input-box {
             display: flex;
+            flex-direction: column;
             gap: 6px;
             margin-bottom: 15px;
         }
-        .custom-input-box input {
+        .custom-input-row {
+            display: flex;
+            gap: 6px;
+        }
+        .custom-input-row input {
             flex: 1;
             background: #0d1117;
             border: 1px solid #30363d;
@@ -216,7 +224,7 @@
             text-align: center;
             outline: none;
         }
-        .custom-input-box button {
+        .custom-input-row button {
             padding: 0 12px;
             background: #21262d;
             border: 1px solid #30363d;
@@ -224,6 +232,19 @@
             border-radius: 8px;
             font-size: 13px;
             font-weight: bold;
+            cursor: pointer;
+        }
+        .checkbox-label {
+            font-size: 12px;
+            color: #8b949e;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding-left: 2px;
+        }
+        .checkbox-label input {
+            accent-color: #bb8009;
             cursor: pointer;
         }
         .action-buttons {
@@ -270,7 +291,7 @@
         <div class="video-card">
             <div class="video-header">
                 <span id="modeBadge" class="mode-badge">집중 공부 모드</span>
-                <span id="sourceInfo" class="sub-text">난수 재생 중</span>
+                <span id="sourceInfo" class="sub-text">재생 중</span>
             </div>
             <div class="video-box">
                 <video id="vid1" autoplay muted playsinline class="active"></video>
@@ -313,8 +334,13 @@
             </div>
 
             <div class="custom-input-box">
-                <input type="number" id="customMinutes" placeholder="직접 입력 (분)" min="1">
-                <button onclick="setCustomTimer()">설정</button>
+                <div class="custom-input-row">
+                    <input type="number" id="customMinutes" placeholder="직접 입력 (분)" min="1">
+                    <button onclick="setCustomTimer()">설정</button>
+                </div>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="breakModeCheckbox"> 휴식 시간으로 설정하기
+                </label>
             </div>
         </div>
 
@@ -327,13 +353,16 @@
 
 <script>
     const studyVideos = ['study_1.mp4', 'study_2.mp4'];
-    const breakVideos = ['break_1.mp4'];
-
+    
     let totalSeconds = 30 * 60;
+    let initialTotalSeconds = 30 * 60; // 총 설정 시간 기록용
     let timerInterval = null;
     let isBreakTime = false;
     let currentMode = 'study';
     let accumulatedStudySeconds = 0;
+
+    // 휴식 모드 영상 제어를 위한 상태 변수 (0: 시작 전, 1: study_3 재생 중, 2: study_4 반복 재생 중, 3: study_5 2초 남음 전환 완료)
+    let breakVideoStage = 0;
 
     let activeVidIndex = 1;
     const v1 = document.getElementById('vid1');
@@ -342,7 +371,7 @@
     let asmrWindow = null;
 
     window.onload = () => {
-        playNextRandomVideo('study');
+        playRandomStudyVideo();
         updateDisplay();
     };
 
@@ -350,11 +379,148 @@
     v2.addEventListener('ended', () => handleVideoEnd());
 
     function handleVideoEnd() {
-        playNextRandomVideo(currentMode);
+        if (!isBreakTime) {
+            playRandomStudyVideo();
+        } else {
+            // 휴식 모드 영상 제어 로직
+            if (breakVideoStage === 1) {
+                // study_3이 끝나면 -> study_4로 넘어가서 반복 재생 시작
+                breakVideoStage = 2;
+                playSpecificVideo('study_4.mp4', true); // true는 loop 설정
+            } else if (breakVideoStage === 2) {
+                // study_4가 혹시 끝나더라도 계속 study_4 반복
+                playSpecificVideo('study_4.mp4', true);
+            } else if (breakVideoStage === 3) {
+                // study_5가 끝나면 study_5 반복 유지
+                playSpecificVideo('study_5.mp4', true);
+            }
+        }
     }
 
+    // 집중 모드일 때 study_1, study_2 중 랜덤 재생
+    function playRandomStudyVideo() {
+        const randomIndex = Math.floor(Math.random() * studyVideos.length);
+        playSpecificVideo(studyVideos[randomIndex], false);
+        document.getElementById('sourceInfo').innerText = `집중 영상 ${randomIndex + 1}`;
+    }
+
+    // 특정 영상 재생 함수 (루프 여부 지정 가능)
+    function playSpecificVideo(filename, isLoop) {
+        let currentVid = (activeVidIndex === 1) ? v1 : v2;
+        let nextVid = (activeVidIndex === 1) ? v2 : v1;
+
+        nextVid.loop = isLoop;
+        nextVid.src = filename;
+        nextVid.load();
+        
+        nextVid.play().then(() => {
+            nextVid.classList.add('active');
+            currentVid.classList.remove('active');
+            activeVidIndex = (activeVidIndex === 1) ? 2 : 1;
+        }).catch(e => {
+            console.log("자동재생 대기중:", e);
+        });
+    }
+
+    function updateDisplay() {
+        const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+        const seconds = String(totalSeconds % 60).padStart(2, '0');
+        document.getElementById('display').innerText = `${hours}:${minutes}:${seconds}`;
+    }
+
+    function setTimer(minutes, breakMode) {
+        stopTimer();
+        totalSeconds = minutes * 60;
+        initialTotalSeconds = totalSeconds;
+        isBreakTime = breakMode;
+        breakVideoStage = 0;
+
+        const badge = document.getElementById('modeBadge');
+        const timerLabel = document.getElementById('timerModeLabel');
+
+        if (isBreakTime) {
+            badge.innerText = "휴식 시간 모드";
+            badge.className = "mode-badge break";
+            timerLabel.innerText = "휴식 시간";
+            timerLabel.style.color = "#bb8009";
+            
+            // 휴식 시작 시: study_3 재생 예약 (타이머 시작할 때 혹은 지금 바로)
+            breakVideoStage = 1;
+            playSpecificVideo('study_3.mp4', false);
+            document.getElementById('sourceInfo').innerText = "휴식 영상 (시작)";
+        } else {
+            badge.innerText = "집중 공부 모드";
+            badge.className = "mode-badge";
+            timerLabel.innerText = "집중 공부 모드";
+            timerLabel.style.color = "#2ea043";
+            playRandomStudyVideo();
+        }
+        updateDisplay();
+    }
+
+    function setCustomTimer() {
+        const mins = parseInt(document.getElementById('customMinutes').value);
+        if (isNaN(mins) || mins <= 0) {
+            alert("올바른 분(Minute)을 입력하세요.");
+            return;
+        }
+        const isBreakChecked = document.getElementById('breakModeCheckbox').checked;
+        setTimer(mins, isBreakChecked);
+    }
+
+    function startTimer() {
+        if (timerInterval || totalSeconds <= 0) return;
+        
+        // 만약 휴식 모드인데 아직 영상을 안 틀었거나 정지 상태였다면 stage 확인
+        if (isBreakTime && breakVideoStage === 0) {
+            breakVideoStage = 1;
+            playSpecificVideo('study_3.mp4', false);
+        }
+
+        timerInterval = setInterval(() => {
+            if (totalSeconds > 0) {
+                totalSeconds--;
+                updateDisplay();
+
+                // 휴식 모드일 때 남은 시간이 정확히 2초 남았을 때 study_5로 전환
+                if (isBreakTime && totalSeconds === 2 && breakVideoStage < 3) {
+                    breakVideoStage = 3;
+                    playSpecificVideo('study_5.mp4', false);
+                    document.getElementById('sourceInfo').innerText = "휴식 임박 (2초 전)";
+                }
+
+                if (!isBreakTime) {
+                    accumulatedStudySeconds++;
+                    updateCharacterProgress();
+                }
+            } else {
+                stopTimer();
+                stopMainAsmr();
+                alert(isBreakTime ? "휴식 시간이 종료되었습니다!" : "공부 시간이 종료되었습니다! 수고하셨습니다.");
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        stopMainAsmr();
+    }
+
+    function updateCharacterProgress() {
+        const totalMinutes = Math.floor(accumulatedStudySeconds / 60);
+        document.getElementById('totalStudyText').innerText = `누적 공부: ${totalMinutes}분`;
+
+        const progressPercent = Math.min((totalMinutes % 60) / 60 * 100, 100);
+        document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+        let level = Math.floor(totalMinutes / 60) + 1;
+        document.getElementById('levelText').innerText = `성장 단계: Lv.${level} 수련생`;
+    }
+
+    // 모바일 최적화 ASMR 팝업창 함수
     function openAsmrPopup() {
-        // 안드로이드 스마트폰 화면에서도 시원하게 보이도록 팝업창 크기 대폭 확장 (폭 500, 높이 780)
         const popupWidth = 500;
         const popupHeight = 780;
         const left = (window.innerWidth - popupWidth) / 2 + window.screenX;
@@ -384,7 +550,6 @@
                     }
                     h2 { color: rgb(255, 0, 255); margin-bottom: 6px; font-size: 22px; text-align: center; }
                     p { color: #8b949e; font-size: 13px; margin-bottom: 20px; text-align: center; }
-                    
                     .mixer-container {
                         background: #161b22;
                         border: 1px solid #30363d;
@@ -416,7 +581,6 @@
                         font-weight: bold;
                         color: #c9d1d9;
                     }
-                    /* 스마트폰 터치 편의성을 위한 토글 버튼 크기 확대 */
                     .toggle-btn {
                         background: #30363d;
                         color: #8b949e;
@@ -432,7 +596,6 @@
                         background: #2ea043;
                         color: white;
                     }
-                    /* 슬라이더 바 조작감 개선 */
                     input[type=range] {
                         flex: 1;
                         margin-left: 15px;
@@ -543,106 +706,6 @@
                 asmrWindow.stopAllSounds();
             } catch (e) {}
         }
-    }
-
-    function playNextRandomVideo(mode) {
-        currentMode = mode;
-        const playlist = (mode === 'study') ? studyVideos : breakVideos;
-        const randomIndex = Math.floor(Math.random() * playlist.length);
-        const selectedSrc = playlist[randomIndex];
-
-        let currentVid = (activeVidIndex === 1) ? v1 : v2;
-        let nextVid = (activeVidIndex === 1) ? v2 : v1;
-
-        nextVid.src = selectedSrc;
-        nextVid.load();
-        
-        nextVid.play().then(() => {
-            nextVid.classList.add('active');
-            currentVid.classList.remove('active');
-            activeVidIndex = (activeVidIndex === 1) ? 2 : 1;
-        }).catch(e => {
-            console.log("자동재생 대기중:", e);
-        });
-
-        document.getElementById('sourceInfo').innerText = `난수 재생 중 (소스 ${randomIndex + 1}/${playlist.length})`;
-    }
-
-    function updateDisplay() {
-        const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-        const seconds = String(totalSeconds % 60).padStart(2, '0');
-        document.getElementById('display').innerText = `${hours}:${minutes}:${seconds}`;
-    }
-
-    function setTimer(minutes, breakMode) {
-        stopTimer();
-        totalSeconds = minutes * 60;
-        isBreakTime = breakMode;
-
-        const badge = document.getElementById('modeBadge');
-        const timerLabel = document.getElementById('timerModeLabel');
-
-        if (isBreakTime) {
-            badge.innerText = "휴식 시간 모드";
-            badge.className = "mode-badge break";
-            timerLabel.innerText = "휴식 시간";
-            timerLabel.style.color = "#bb8009";
-            playNextRandomVideo('break');
-        } else {
-            badge.innerText = "집중 공부 모드";
-            badge.className = "mode-badge";
-            timerLabel.innerText = "집중 공부 모드";
-            timerLabel.style.color = "#2ea043";
-            playNextRandomVideo('study');
-        }
-        updateDisplay();
-    }
-
-    function setCustomTimer() {
-        const mins = parseInt(document.getElementById('customMinutes').value);
-        if (isNaN(mins) || mins <= 0) {
-            alert("올바른 분(Minute)을 입력하세요.");
-            return;
-        }
-        setTimer(mins, false);
-    }
-
-    function startTimer() {
-        if (timerInterval || totalSeconds <= 0) return;
-        
-        timerInterval = setInterval(() => {
-            if (totalSeconds > 0) {
-                totalSeconds--;
-                updateDisplay();
-
-                if (!isBreakTime) {
-                    accumulatedStudySeconds++;
-                    updateCharacterProgress();
-                }
-            } else {
-                stopTimer();
-                stopMainAsmr();
-                alert(isBreakTime ? "휴식 시간이 종료되었습니다!" : "공부 시간이 종료되었습니다! 수고하셨습니다.");
-            }
-        }, 1000);
-    }
-
-    function stopTimer() {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        stopMainAsmr();
-    }
-
-    function updateCharacterProgress() {
-        const totalMinutes = Math.floor(accumulatedStudySeconds / 60);
-        document.getElementById('totalStudyText').innerText = `누적 공부: ${totalMinutes}분`;
-
-        const progressPercent = Math.min((totalMinutes % 60) / 60 * 100, 100);
-        document.getElementById('progressBar').style.width = `${progressPercent}%`;
-
-        let level = Math.floor(totalMinutes / 60) + 1;
-        document.getElementById('levelText').innerText = `성장 단계: Lv.${level} 수련생`;
     }
 </script>
 
