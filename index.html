@@ -91,7 +91,7 @@
             object-fit: cover;
             background: #000000;
             opacity: 0;
-            transition: opacity 0.3s ease-in-out;
+            transition: opacity 0.2s ease-in-out;
         }
         video.active {
             opacity: 1;
@@ -498,7 +498,7 @@
     let isEasterEggMode = false;
     let accumulatedStudySeconds = 0;
 
-    let breakVideoStage = 0;
+    let breakVideoStage = 0; // 0: 평상시, 1: study_3 재생 중, 2: study_4 반복 중, 3: study_5 임박 재생 중
 
     let activeVidIndex = 1;
     const v1 = document.getElementById('vid1');
@@ -519,13 +519,16 @@
         if (!isBreakTime) {
             playRandomStudyVideo();
         } else {
+            // study_3 (stage 1) 영상이 완전히 끝났을 때만 엄격하게 stage 2로 넘어가서 study_4 재생
             if (breakVideoStage === 1) {
                 breakVideoStage = 2;
                 playSpecificVideo('study_4.mp4', true, true);
+                document.getElementById('sourceInfo').innerText = "휴식 영상 (반복)";
             } else if (breakVideoStage === 2) {
+                // study_4는 loop = true 이므로 원래는 끝나지 않지만 만약 끝나면 다시 재생
                 playSpecificVideo('study_4.mp4', true, true);
             } else if (breakVideoStage === 3) {
-                playSpecificVideo('study_5.mp4', true, true);
+                // study_5 종료 시 처리
             }
         }
     }
@@ -539,6 +542,7 @@
         let currentVid = (activeVidIndex === 1) ? v1 : v2;
         let nextVid = (activeVidIndex === 1) ? v2 : v1;
 
+        // 현재 영상을 완전히 멈춘 뒤에 새 영상을 올림
         currentVid.pause();
         currentVid.currentTime = 0;
         currentVid.muted = true;
@@ -573,7 +577,6 @@
         const inputVal = inputElem.value.trim();
         const isBreakChecked = checkboxElem.checked;
 
-        // 이스터에그 1: 휴식 체크 + '120' 입력 -> video_0824.mp4 재생 및 정확히 120분 설정
         if (isBreakChecked && inputVal === '120') {
             if (window.confirm("너 정말 이만큼 쉴꺼야?")) {
                 triggerEasterEgg('video_0824.mp4', 120, "120 시크릿 휴식");
@@ -581,7 +584,6 @@
             return;
         }
 
-        // 이스터에그 2: 휴식 체크 + '60' 입력 -> video_60.mp4 재생 및 60분 설정
         if (isBreakChecked && inputVal === '60') {
             triggerEasterEgg('video_60.mp4', 60, "60분 시크릿 휴식");
             return;
@@ -611,6 +613,7 @@
             timerLabel.innerText = "휴식 시간";
             timerLabel.style.color = "#bb8009";
             
+            // 휴식 시작 시 study_3.mp4를 단발(loop: false)로 재생 시작 (stage 1)
             breakVideoStage = 1;
             playSpecificVideo('study_3.mp4', false, true);
             document.getElementById('sourceInfo').innerText = "휴식 영상 (시작)";
@@ -628,7 +631,7 @@
         stopTimer();
         isEasterEggMode = true;
         isBreakTime = true;
-        totalSeconds = durationMins * 60; // 120분 또는 60분 정확히 반영
+        totalSeconds = durationMins * 60;
 
         stopAllSounds();
 
@@ -651,6 +654,7 @@
         if (isBreakTime && !isEasterEggMode && breakVideoStage === 0) {
             breakVideoStage = 1;
             playSpecificVideo('study_3.mp4', false, true);
+            document.getElementById('sourceInfo').innerText = "휴식 영상 (시작)";
         }
 
         timerInterval = setInterval(() => {
@@ -658,6 +662,7 @@
                 totalSeconds--;
                 updateDisplay();
 
+                // 휴식 종료 2초 전 study_5.mp4로 전환 (stage 3)
                 if (isBreakTime && !isEasterEggMode && totalSeconds === 2 && breakVideoStage < 3) {
                     breakVideoStage = 3;
                     playSpecificVideo('study_5.mp4', false, true);
