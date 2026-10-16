@@ -355,7 +355,7 @@
 
     function openAsmrPopup() {
         const popupWidth = 460;
-        const popupHeight = 680;
+        const popupHeight = 650;
         const left = (window.innerWidth - popupWidth) / 2 + window.screenX;
         const top = (window.innerHeight - popupHeight) / 2 + window.screenY;
 
@@ -456,9 +456,9 @@
                 <button class="all-stop-btn" onclick="stopAllSounds()">모든 소리 끄기 ⏹️</button>
 
                 <script>
+                    // 카페 소음이 제외된 9가지 ASMR 트랙 리스트
                     const soundTracks = [
                         { id: 'birds', name: '새소리 🐦', file: 'birds.mp3' },
-                        { id: 'coffee', name: '카페 소음 ☕', file: 'cafe.mp3' },
                         { id: 'crickets', name: '귀뚜라미 🦗', file: 'crickets.mp3' },
                         { id: 'fire', name: '모닥불 🪵', file: 'fire.mp3' },
                         { id: 'keyboard', name: '키보드 ⌨️', file: 'keyboard.mp3' },
