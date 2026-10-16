@@ -304,7 +304,7 @@
                     <h2>오늘도 열심히 공부</h2>
                     <p>타이머를 설정하고 캐릭터와 함께 공부하세요.</p>
                 </div>
-                <!-- ASMR 팝업 버튼 추가 -->
+                <!-- ASMR 팝업 버튼 -->
                 <button class="asmr-btn" onclick="openAsmrPopup()">ASMR</button>
             </div>
 
@@ -347,6 +347,9 @@
     const v1 = document.getElementById('vid1');
     const v2 = document.getElementById('vid2');
 
+    // 메인 페이지에서 관리하는 전역 ASMR 오디오 객체
+    let currentAsmrAudio = null;
+
     window.onload = () => {
         playNextRandomVideo('study');
         updateDisplay();
@@ -359,14 +362,13 @@
         playNextRandomVideo(currentMode);
     }
 
-    // ASMR 버튼 클릭 시 새로운 팝업창을 띄우는 함수
+    // ASMR 팝업창 열기 함수
     function openAsmrPopup() {
         const popupWidth = 450;
-        const popupHeight = 500;
+        const popupHeight = 520;
         const left = (window.innerWidth - popupWidth) / 2 + window.screenX;
         const top = (window.innerHeight - popupHeight) / 2 + window.screenY;
 
-        // 새 팝업 창 생성
         const popup = window.open('', 'ASMRPlayer', `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`);
         
         popup.document.write(`
@@ -389,8 +391,8 @@
                         padding: 20px;
                         text-align: center;
                     }
-                    h2 { color: rgb(255, 0, 255); margin-bottom: 15px; }
-                    p { color: #8b949e; font-size: 13px; margin-bottom: 25px; }
+                    h2 { color: rgb(255, 0, 255); margin-bottom: 10px; }
+                    p { color: #8b949e; font-size: 13px; margin-bottom: 20px; }
                     .asmr-box {
                         background: #161b22;
                         border: 1px solid #30363d;
@@ -398,131 +400,20 @@
                         border-radius: 12px;
                         width: 100%;
                         max-width: 350px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
                     }
                     button {
-                        background: #2ea043;
-                        color: white;
-                        border: none;
-                        padding: 10px 20px;
+                        background: #21262d;
+                        color: #c9d1d9;
+                        border: 1px solid #30363d;
+                        padding: 12px;
                         border-radius: 8px;
                         font-weight: bold;
+                        font-size: 13px;
                         cursor: pointer;
-                        margin: 5px;
+                        transition: 0.2s;
                     }
-                    button:hover { background: #2c974b; }
-                </style>
-            </head>
-            <body>
-                <div class="asmr-box">
-                    <h2>🎧 집중 ASMR 룸</h2>
-                    <p>공부에 집중하기 좋은 소리를 선택하세요.</p>
-                    <button onclick="alert('비 오는 소리 재생(추후 연결)')">비 오는 소리 🌧️</button>
-                    <button onclick="alert('카페 백색소음 재생(추후 연결)')">카페 소음 ☕</button>
-                    <button onclick="alert('모닥불 소리 재생(추후 연결)')">모닥불 🪵</button>
-                </div>
-            </body>
-            </html>
-        `);
-    }
-
-    function playNextRandomVideo(mode) {
-        currentMode = mode;
-        const playlist = (mode === 'study') ? studyVideos : breakVideos;
-        const randomIndex = Math.floor(Math.random() * playlist.length);
-        const selectedSrc = playlist[randomIndex];
-
-        let currentVid = (activeVidIndex === 1) ? v1 : v2;
-        let nextVid = (activeVidIndex === 1) ? v2 : v1;
-
-        nextVid.src = selectedSrc;
-        nextVid.load();
-        
-        nextVid.play().then(() => {
-            nextVid.classList.add('active');
-            currentVid.classList.remove('active');
-            activeVidIndex = (activeVidIndex === 1) ? 2 : 1;
-        }).catch(e => {
-            console.log("자동재생 대기중:", e);
-        });
-
-        document.getElementById('sourceInfo').innerText = `난수 재생 중 (소스 ${randomIndex + 1}/${playlist.length})`;
-    }
-
-    function updateDisplay() {
-        const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-        const seconds = String(totalSeconds % 60).padStart(2, '0');
-        document.getElementById('display').innerText = `${hours}:${minutes}:${seconds}`;
-    }
-
-    function setTimer(minutes, breakMode) {
-        stopTimer();
-        totalSeconds = minutes * 60;
-        isBreakTime = breakMode;
-
-        const badge = document.getElementById('modeBadge');
-        const timerLabel = document.getElementById('timerModeLabel');
-
-        if (isBreakTime) {
-            badge.innerText = "휴식 시간 모드";
-            badge.className = "mode-badge break";
-            timerLabel.innerText = "휴식 시간";
-            timerLabel.style.color = "#bb8009";
-            playNextRandomVideo('break');
-        } else {
-            badge.innerText = "집중 공부 모드";
-            badge.className = "mode-badge";
-            timerLabel.innerText = "집중 공부 모드";
-            timerLabel.style.color = "#2ea043";
-            playNextRandomVideo('study');
-        }
-        updateDisplay();
-    }
-
-    function setCustomTimer() {
-        const mins = parseInt(document.getElementById('customMinutes').value);
-        if (isNaN(mins) || mins <= 0) {
-            alert("올바른 분(Minute)을 입력하세요.");
-            return;
-        }
-        setTimer(mins, false);
-    }
-
-    function startTimer() {
-        if (timerInterval || totalSeconds <= 0) return;
-        
-        timerInterval = setInterval(() => {
-            if (totalSeconds > 0) {
-                totalSeconds--;
-                updateDisplay();
-
-                if (!isBreakTime) {
-                    accumulatedStudySeconds++;
-                    updateCharacterProgress();
-                }
-            } else {
-                stopTimer();
-                alert(isBreakTime ? "휴식 시간이 종료되었습니다!" : "공부 시간이 종료되었습니다! 수고하셨습니다.");
-            }
-        }, 1000);
-    }
-
-    function stopTimer() {
-        clearInterval(timerInterval);
-        timerInterval = null;
-    }
-
-    function updateCharacterProgress() {
-        const totalMinutes = Math.floor(accumulatedStudySeconds / 60);
-        document.getElementById('totalStudyText').innerText = `누적 공부: ${totalMinutes}분`;
-
-        const progressPercent = Math.min((totalMinutes % 60) / 60 * 100, 100);
-        document.getElementById('progressBar').style.width = `${progressPercent}%`;
-
-        let level = Math.floor(totalMinutes / 60) + 1;
-        document.getElementById('levelText').innerText = `성장 단계: Lv.${level} 수련생`;
-    }
-</script>
-
-</body>
-</html>
+                    button:hover { background: #30363d; color: #fff; }
+                    button.stop-btn { background: #da3633; color: white; border: none; margin-top: 10
