@@ -26,7 +26,6 @@
         video.active { opacity: 1; }
 
         .status-card { background: #21262d; border-radius: 14px; padding: 15px; border: 1px solid #30363d; text-align: center; }
-        .status-quote { color: #8b949e; font-size: 12px; margin-bottom: 8px; }
         .progress-bar-bg { background: #30363d; border-radius: 10px; height: 8px; width: 100%; overflow: hidden; margin-bottom: 8px; }
         .progress-bar-fill { background: #2ea043; height: 100%; width: 0%; transition: width 0.4s ease; }
         .status-footer { display: flex; justify-content: space-between; font-size: 11px; color: #c9d1d9; }
@@ -95,7 +94,6 @@
             </div>
         </div>
         <div class="status-card">
-            <div class="status-quote">"캐릭터가 성장해요!"</div>
             <div class="progress-bar-bg"><div id="progressBar" class="progress-bar-fill" style="width: 0%;"></div></div>
             <div class="status-footer"><span id="totalStudyText">누적: 0분</span><span id="levelText">Lv.1 연습생</span></div>
         </div>
@@ -130,7 +128,7 @@
         </div>
         <div class="action-buttons">
             <button class="btn-start" onclick="startTimer()">시작</button>
-            <button class="btn-stop" onclick="stopTimer()">초기화</button>
+            <button class="btn-stop" onclick="pauseTimer()">일시정지</button>
         </div>
     </div>
 </div>
@@ -150,7 +148,6 @@
         if (!isBreakTime) {
             playVideo(studyVideos[Math.floor(Math.random() * studyVideos.length)], false, true, "집중 영상");
         } else if (breakStage === 1) {
-            // study_3(3번 영상) 종료 후 마지막 프레임 고정 상태로 정지 유지
             breakStage = 2;
             let cur = activeVid === 1 ? v2 : v1;
             cur.pause();
@@ -213,13 +210,13 @@
     }
 
     function setTimer(mins, breakMode) {
-        stopTimer(); isEasterEggMode = false; totalSeconds = mins * 60; isBreakTime = breakMode; breakStage = 0;
+        pauseTimer(); isEasterEggMode = false; totalSeconds = mins * 60; isBreakTime = breakMode; breakStage = 0;
         const badge = document.getElementById('modeBadge'), label = document.getElementById('timerModeLabel');
 
         if (isBreakTime) {
             badge.innerText = "휴식 시간 모드"; badge.className = "mode-badge break";
             label.innerText = "휴식 시간"; label.style.color = "#bb8009";
-            breakStage = 1; // 휴식 시작 시 study_3 재생
+            breakStage = 1;
             playVideo('study_3.mp4', false, true, "휴식 영상 (시작)");
         } else {
             badge.innerText = "집중 공부 모드"; badge.className = "mode-badge";
@@ -230,7 +227,7 @@
     }
 
     function triggerEasterEgg(filename, mins, text) {
-        stopTimer(); isEasterEggMode = true; isBreakTime = true; totalSeconds = mins * 60; stopAllSounds();
+        pauseTimer(); isEasterEggMode = true; isBreakTime = true; totalSeconds = mins * 60; stopAllSounds();
         document.getElementById('modeBadge').innerText = "시크릿 휴식 모드";
         document.getElementById('modeBadge').className = "mode-badge easteregg";
         const label = document.getElementById('timerModeLabel');
@@ -250,7 +247,6 @@
                 totalSeconds--;
                 updateDisplay();
                 
-                // 휴식 종료 정확히 2초 전 study_5(5번 영상)로 전환
                 if (isBreakTime && !isEasterEggMode && totalSeconds === 2 && breakStage < 3) {
                     breakStage = 3;
                     playVideo('study_5.mp4', false, true, "휴식 임박 (2초 전)");
@@ -261,11 +257,12 @@
                     updateProgress();
                 }
             } else {
-                stopTimer();
+                pauseTimer();
                 if (isBreakTime) {
-                    alert("휴식 종료! 집중 모드로 전환합니다.");
-                    setTimer(30, false);
-                    startTimer();
+                    // 휴식 종료 시 타이머를 00:00:00으로 맞추고 일시 정지 상태로 대기
+                    totalSeconds = 0;
+                    updateDisplay();
+                    alert("휴식 시간이 종료되었습니다!");
                 } else {
                     alert("공부 시간이 종료되었습니다!");
                 }
@@ -273,7 +270,7 @@
         }, 1000);
     }
 
-    function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
+    function pauseTimer() { clearInterval(timerInterval); timerInterval = null; }
 
     function updateProgress() {
         const mins = Math.floor(accumulatedStudySeconds / 60);
