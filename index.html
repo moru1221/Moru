@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>오늘도 열심히 공부</title>
 
-    <!-- 링크 공유 시 미리보기 제목 및 설명 설정 -->
     <meta property="og:title" content="오늘도 열심히 공부">
     <meta property="og:description" content="ASMR과 타이머로 집중력을 높이고 캐릭터를 키워보세요!">
     <meta property="og:type" content="website">
@@ -276,7 +275,7 @@
             color: white;
         }
 
-        /* ASMR 패널 오버레이 (10개 항목 모두 쾌적하게 보이도록 높이 및 스크롤 최적화) */
+        /* ASMR 패널 오버레이 */
         .asmr-modal {
             position: absolute;
             top: 0;
@@ -410,7 +409,7 @@
 <body>
 
 <div class="main-container">
-    <!-- ASMR 패널 오버레이 (왁뿌볼 포함 10개 트랙 표시) -->
+    <!-- ASMR 패널 오버레이 -->
     <div id="asmrModal" class="asmr-modal">
         <h3>🎧 ASMR 사운드 믹서</h3>
         <p>설정창을 닫아도 선택한 소리는 백그라운드에서 계속 재생됩니다.</p>
@@ -487,6 +486,8 @@
     </div>
 </div>
 
+<!-- 버전 캐시 방지용 스크립트 선언 -->
+<script src="app.js?v=2026"></script>
 <script>
     const studyVideos = ['study_1.mp4', 'study_2.mp4'];
     
@@ -646,7 +647,7 @@
         document.getElementById('levelText').innerText = `성장 단계: Lv.${level} 수련생`;
     }
 
-    /* ASMR 백그라운드 유지형 믹서 로직 (왁뿌볼 포함 정확히 10개 트랙) */
+    /* ASMR 10가지 트랙 (왁뿌볼 포함) */
     const soundTracks = [
         { id: 'birds', name: '새소리 🐦', file: 'birds.mp3' },
         { id: 'crickets', name: '귀뚜라미 🦗', file: 'crickets.mp3' },
@@ -662,4 +663,18 @@
 
     const audioElements = {};
 
-    function initAsmr
+    function initAsmrMixer() {
+        const mixerBox = document.getElementById('mixerBox');
+        mixerBox.innerHTML = "";
+        
+        soundTracks.forEach(track => {
+            const audio = new Audio(track.file);
+            audio.loop = true;
+            audio.volume = 0.5;
+            audioElements[track.id] = audio;
+
+            const row = document.createElement('div');
+            row.className = 'sound-row';
+            row.innerHTML = `
+                <div class="sound-info">
+                    <button class="toggle-btn" id="btn-${track.id}" onclick="toggleSound('${track.id
