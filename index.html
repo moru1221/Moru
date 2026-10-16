@@ -91,7 +91,7 @@
             object-fit: cover;
             background: #000000;
             opacity: 0;
-            transition: opacity 0.15s ease-in-out; /* 전환 속도를 더 매끄럽게 단축 */
+            transition: opacity 0.2s ease-in-out;
         }
         video.active {
             opacity: 1;
@@ -428,7 +428,7 @@
         <div class="video-card">
             <div class="video-header">
                 <span id="modeBadge" class="mode-badge">집중 공부 모드</span>
-                <span id="sourceInfo" class="source-info">재생 중</span>
+                <span id="sourceInfo" class="sub-text">재생 중</span>
             </div>
             <div class="video-box">
                 <video id="vid1" autoplay playsinline></video>
@@ -498,7 +498,7 @@
     let isEasterEggMode = false;
     let accumulatedStudySeconds = 0;
 
-    let breakVideoStage = 0; // 0: 평상시, 1: study_3 재생 중, 2: study_4 반복 중, 3: study_5 임박 재생 중
+    let breakVideoStage = 0; // 0: 평상시, 1: study_3 재생 중, 2: 2초 대기 중, 3: study_4 반복 재생 중, 4: study_5 임박 재생 중
 
     let activeVidIndex = 1;
     const v1 = document.getElementById('vid1');
@@ -513,65 +513,33 @@
     v1.addEventListener('ended', handleVideoEnd);
     v2.addEventListener('ended', handleVideoEnd);
 
-    // 비디오가 끝나기 직전(약 0.3초 전) 미리 다음 영상을 준비시키는 이벤트 (타이밍 겹침/깜빡임 원천 차단)
-    v1.addEventListener('timeupdate', checkVideoPreload);
-    v2.addEventListener('timeupdate', checkVideoPreload);
-
-    function checkVideoPreload(e) {
-        const vid = e.target;
-        // 남은 시간이 0.3초 미만이고, 휴식 모드에서 stage 1(study_3) 재생 중일 때 미리 study_4 로드
-        if (isBreakTime && breakVideoStage === 1 && vid.duration - vid.currentTime < 0.3 && !vid._preloadTriggered) {
-            vid._preloadTriggered = true;
-            preloadNextVideo('study_4.mp4', true, true);
-        }
-    }
-
-    function preloadNextVideo(filename, loop, muted) {
-        let nextVid = (activeVidIndex === 1) ? v2 : v1;
-        if (nextVid.src.indexOf(filename) === -1) {
-            nextVid.loop = loop;
-            nextVid.muted = muted;
-            nextVid.src = filename;
-            nextVid.load();
-        }
-    }
-
     function handleVideoEnd() {
         if (isEasterEggMode) return;
 
         if (!isBreakTime) {
             playRandomStudyVideo();
         } else {
+            // study_3.mp4가 끝나면 화면을 블랙(숨김)으로 만들고 정확히 2초 동안 대기한 뒤 study_4.mp4 재생
             if (breakVideoStage === 1) {
-                breakVideoStage = 2;
-                playPreloadedVideo('study_4.mp4', true, true);
-                document.getElementById('sourceInfo').innerText = "휴식 영상 (반복)";
-            } else if (breakVideoStage === 2) {
-                playPreloadedVideo('study_4.mp4', true, true);
+                breakVideoStage = 2; // 대기 상태
+                
+                // 현재 영상을 완전히 숨겨서 블랙 화면 유지
+                v1.classList.remove('active');
+                v2.classList.remove('active');
+                document.getElementById('sourceInfo').innerText = "휴식 대기 중 (2초)";
+
+                setTimeout(() => {
+                    if (isBreakTime && breakVideoStage === 2) {
+                        breakVideoStage = 3; // study_4 반복 재생 단계
+                        playSpecificVideo('study_4.mp4', true, true);
+                        document.getElementById('sourceInfo').innerText = "휴식 영상 (반복)";
+                    }
+                }, 2000); // 2초(2000밀리초) 대기
+
+            } else if (breakVideoStage === 3) {
+                playSpecificVideo('study_4.mp4', true, true);
             }
         }
-    }
-
-    function playPreloadedVideo(filename, loop, muted) {
-        let currentVid = (activeVidIndex === 1) ? v1 : v2;
-        let nextVid = (activeVidIndex === 1) ? v2 : v1;
-
-        nextVid.loop = loop;
-        nextVid.muted = muted;
-        if (nextVid.src.indexOf(filename) === -1) {
-            nextVid.src = filename;
-            nextVid.load();
-        }
-
-        nextVid.play().then(() => {
-            nextVid.classList.add('active');
-            currentVid.classList.remove('active');
-            currentVid.pause();
-            currentVid.currentTime = 0;
-            activeVidIndex = (activeVidIndex === 1) ? 2 : 1;
-        }).catch(e => {
-            console.log("재생 대기중:", e);
-        });
     }
 
     function playRandomStudyVideo() {
@@ -644,9 +612,6 @@
         isBreakTime = breakMode;
         breakVideoStage = 0;
 
-        v1._preloadTriggered = false;
-        v2._preloadTriggered = false;
-
         const badge = document.getElementById('modeBadge');
         const timerLabel = document.getElementById('timerModeLabel');
 
@@ -704,8 +669,9 @@
                 totalSeconds--;
                 updateDisplay();
 
-                if (isBreakTime && !isEasterEggMode && totalSeconds === 2 && breakVideoStage < 3) {
-                    breakVideoStage = 3;
+                // 휴식 종료 2초 전 study_5.mp4로 전환 (stage 4)
+                if (isBreakTime && !isEasterEggMode && totalSeconds === 2 && breakVideoStage < 4) {
+                    breakVideoStage = 4;
                     playSpecificVideo('study_5.mp4', false, true);
                     document.getElementById('sourceInfo').innerText = "휴식 임박 (2초 전)";
                 }
