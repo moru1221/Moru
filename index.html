@@ -7,7 +7,7 @@
 
     <!-- 링크 공유 시 미리보기 제목 및 설명 설정 -->
     <meta property="og:title" content="오늘도 열심히 공부">
-    <meta property="og:description" content="ASMR과 타이머로 집중력을 발휘합시다!">
+    <meta property="og:description" content="ASMR과 타이머로 집중력을 높이고 캐릭터를 키워보세요!">
     <meta property="og:type" content="website">
 
     <style>
@@ -276,14 +276,14 @@
             color: white;
         }
 
-        /* ASMR 패널 오버레이 */
+        /* ASMR 패널 오버레이 (10개 항목 모두 쾌적하게 보이도록 높이 및 스크롤 최적화) */
         .asmr-modal {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(13, 17, 23, 0.92);
+            background: rgba(13, 17, 23, 0.95);
             backdrop-filter: blur(5px);
             border-radius: 20px;
             z-index: 100;
@@ -291,53 +291,53 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 15px;
         }
         .asmr-modal.active {
             display: flex;
         }
         .asmr-modal h3 {
             color: rgb(255, 0, 255);
-            margin-bottom: 4px;
-            font-size: 20px;
+            margin-bottom: 3px;
+            font-size: 19px;
         }
         .asmr-modal p {
             color: #8b949e;
-            font-size: 12px;
-            margin-bottom: 15px;
+            font-size: 11px;
+            margin-bottom: 10px;
             text-align: center;
         }
         .mixer-container {
             background: #161b22;
             border: 1px solid #30363d;
-            padding: 12px;
+            padding: 10px;
             border-radius: 12px;
             width: 100%;
             max-width: 420px;
-            max-height: 320px;
+            max-height: 350px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: 6px;
+            margin-bottom: 10px;
         }
         .sound-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             background: #21262d;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 8px;
             border: 1px solid #30363d;
         }
         .sound-info {
             display: flex;
             align-items: center;
-            gap: 10px;
-            width: 120px;
+            gap: 8px;
+            width: 130px;
         }
         .sound-info span {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             color: #c9d1d9;
         }
@@ -345,7 +345,7 @@
             background: #30363d;
             color: #8b949e;
             border: none;
-            padding: 5px 10px;
+            padding: 4px 8px;
             border-radius: 6px;
             font-size: 11px;
             font-weight: bold;
@@ -358,7 +358,7 @@
         }
         input[type=range] {
             flex: 1;
-            margin-left: 12px;
+            margin-left: 10px;
             height: 6px;
             accent-color: #2ea043;
             cursor: pointer;
@@ -373,10 +373,10 @@
             background: #2ea043;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 9px;
             border-radius: 8px;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
             flex: 1;
         }
@@ -384,10 +384,10 @@
             background: #da3633;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 9px;
             border-radius: 8px;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
             flex: 1;
         }
@@ -410,7 +410,7 @@
 <body>
 
 <div class="main-container">
-    <!-- ASMR 패널 오버레이 -->
+    <!-- ASMR 패널 오버레이 (왁뿌볼 포함 10개 트랙 표시) -->
     <div id="asmrModal" class="asmr-modal">
         <h3>🎧 ASMR 사운드 믹서</h3>
         <p>설정창을 닫아도 선택한 소리는 백그라운드에서 계속 재생됩니다.</p>
@@ -608,4 +608,58 @@
 
                 if (isBreakTime && totalSeconds === 2 && breakVideoStage < 3) {
                     breakVideoStage = 3;
-                    playSpecificVideo('study
+                    playSpecificVideo('study_5.mp4', false);
+                    document.getElementById('sourceInfo').innerText = "휴식 임박 (2초 전)";
+                }
+
+                if (!isBreakTime) {
+                    accumulatedStudySeconds++;
+                    updateCharacterProgress();
+                }
+            } else {
+                stopTimer();
+                
+                if (isBreakTime) {
+                    alert("휴식 시간이 종료되었습니다! 집중 공부 모드로 전환합니다.");
+                    setTimer(30, false);
+                    startTimer();
+                } else {
+                    alert("공부 시간이 종료되었습니다! 수고하셨습니다.");
+                }
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+
+    function updateCharacterProgress() {
+        const totalMinutes = Math.floor(accumulatedStudySeconds / 60);
+        document.getElementById('totalStudyText').innerText = `누적 공부: ${totalMinutes}분`;
+
+        const progressPercent = Math.min((totalMinutes % 60) / 60 * 100, 100);
+        document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+        let level = Math.floor(totalMinutes / 60) + 1;
+        document.getElementById('levelText').innerText = `성장 단계: Lv.${level} 수련생`;
+    }
+
+    /* ASMR 백그라운드 유지형 믹서 로직 (왁뿌볼 포함 정확히 10개 트랙) */
+    const soundTracks = [
+        { id: 'birds', name: '새소리 🐦', file: 'birds.mp3' },
+        { id: 'crickets', name: '귀뚜라미 🦗', file: 'crickets.mp3' },
+        { id: 'fire', name: '모닥불 🪵', file: 'fire.mp3' },
+        { id: 'keyboard', name: '키보드 ⌨️', file: 'keyboard.mp3' },
+        { id: 'rain', name: '비 오는 소리 🌧️', file: 'rain.mp3' },
+        { id: 'singingbowl', name: '싱잉볼 🔔', file: 'singingbowl.mp3' },
+        { id: 'thunder', name: '천둥 번개 ⚡', file: 'thunder.mp3' },
+        { id: 'waves', name: '파도 소리 🌊', file: 'waves.mp3' },
+        { id: 'wind', name: '바람 소리 🌬️', file: 'wind.mp3' },
+        { id: 'wax', name: '왁뿌볼 🔮', file: 'wax.mp3' }
+    ];
+
+    const audioElements = {};
+
+    function initAsmr
