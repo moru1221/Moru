@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>스터디 메이트 키우기</title>
     <style>
         * {
@@ -16,29 +17,31 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
+            padding: 15px;
         }
         .main-container {
             display: flex;
             background: #161b22;
-            padding: 30px;
+            padding: 20px;
             border-radius: 20px;
             box-shadow: 0 12px 30px rgba(0,0,0,0.6);
-            gap: 30px;
-            width: 900px;
+            gap: 20px;
+            width: 100%;
+            max-width: 850px;
             border: 1px solid #30363d;
         }
         /* 왼쪽 패널 (영상 및 육성 상태) */
         .left-panel {
-            flex: 1.2;
+            flex: 1.1;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
         }
         .video-card {
             background: #21262d;
             border-radius: 14px;
-            padding: 20px;
+            padding: 15px;
             border: 1px solid #30363d;
             position: relative;
         }
@@ -46,14 +49,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         .mode-badge {
             background: #2ea043;
             color: white;
-            padding: 4px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
         }
         .mode-badge.break {
@@ -61,17 +64,17 @@
         }
         .sub-text {
             color: #8b949e;
-            font-size: 12px;
+            font-size: 11px;
         }
         .video-box {
             width: 100%;
-            height: 230px;
+            aspect-ratio: 16 / 9; /* 모바일 화면에서도 영상 비율이 깨지지 않게 고정 */
             background: #000000;
             border-radius: 10px;
             overflow: hidden;
-            position: relative; /* 듀얼 비디오 겹치기를 위한 부모 설정 */
+            position: relative;
         }
-        /* 2개의 비디오 태그를 서로 겹쳐서 깜빡임 원천 차단 */
+        /* 듀얼 비디오 겹치기 구조 */
         video {
             position: absolute;
             top: 0;
@@ -81,7 +84,7 @@
             object-fit: cover;
             background: #000000;
             opacity: 0;
-            transition: opacity 0.3s ease-in-out; /* 부드럽게 스르륵 전환 */
+            transition: opacity 0.3s ease-in-out;
         }
         video.active {
             opacity: 1;
@@ -89,22 +92,22 @@
         .status-card {
             background: #21262d;
             border-radius: 14px;
-            padding: 15px 20px;
+            padding: 15px;
             border: 1px solid #30363d;
             text-align: center;
         }
         .status-quote {
             color: #8b949e;
-            font-size: 13px;
-            margin-bottom: 10px;
+            font-size: 12px;
+            margin-bottom: 8px;
         }
         .progress-bar-bg {
             background: #30363d;
             border-radius: 10px;
-            height: 10px;
+            height: 8px;
             width: 100%;
             overflow: hidden;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .progress-bar-fill {
             background: #2ea043;
@@ -115,7 +118,7 @@
         .status-footer {
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
+            font-size: 11px;
             color: #c9d1d9;
         }
 
@@ -127,51 +130,52 @@
             justify-content: space-between;
         }
         .panel-title h2 {
-            font-size: 22px;
-            margin-bottom: 5px;
+            font-size: 20px;
+            margin-bottom: 4px;
             color: #f0f6fc;
         }
         .panel-title p {
             color: #8b949e;
-            font-size: 13px;
+            font-size: 12px;
         }
         .timer-card {
             background: #21262d;
             border-radius: 14px;
-            padding: 25px 20px;
+            padding: 20px 15px;
             text-align: center;
             border: 1px solid #30363d;
-            margin: 20px 0;
+            margin: 15px 0;
         }
         .timer-mode-label {
             color: #2ea043;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         #display {
-            font-size: 42px;
+            font-size: 36px;
             font-weight: bold;
             letter-spacing: 2px;
             color: #ffffff;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .timer-sub {
             color: #8b949e;
-            font-size: 12px;
+            font-size: 11px;
         }
         .preset-buttons {
             display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: 6px;
+            margin-bottom: 10px;
         }
         .preset-buttons button {
             flex: 1;
-            padding: 10px 0;
+            padding: 8px 0;
             background: #21262d;
             border: 1px solid #30363d;
             color: #c9d1d9;
             border-radius: 8px;
+            font-size: 13px;
             font-weight: bold;
             cursor: pointer;
             transition: 0.2s;
@@ -180,63 +184,68 @@
             background: #30363d;
             color: #fff;
         }
-        .preset-buttons button.break-preset:hover {
-            border-color: #bb8009;
-        }
         .custom-input-box {
             display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
+            gap: 6px;
+            margin-bottom: 15px;
         }
         .custom-input-box input {
             flex: 1;
             background: #0d1117;
             border: 1px solid #30363d;
             border-radius: 8px;
-            padding: 10px;
+            padding: 8px;
             color: white;
+            font-size: 13px;
             text-align: center;
             outline: none;
         }
-        .custom-input-box input:focus {
-            border-color: #2ea043;
-        }
         .custom-input-box button {
-            padding: 0 15px;
+            padding: 0 12px;
             background: #21262d;
             border: 1px solid #30363d;
             color: #c9d1d9;
             border-radius: 8px;
+            font-size: 13px;
             font-weight: bold;
             cursor: pointer;
         }
-        .custom-input-box button:hover {
-            background: #30363d;
-            color: #fff;
-        }
         .action-buttons {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
         .action-buttons button {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
             border: none;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
         }
         .btn-start {
             background: #2ea043;
             color: white;
         }
-        .btn-start:hover { background: #2c974b; }
         .btn-stop {
             background: #da3633;
             color: white;
         }
-        .btn-stop:hover { background: #c5302c; }
+
+        /* 스마트폰처럼 화면이 좁을 때(세로 모드) 자동으로 세로 정렬로 전환 */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                padding: 15px;
+                gap: 15px;
+            }
+            .video-box {
+                height: 200px;
+            }
+            #display {
+                font-size: 38px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -250,7 +259,6 @@
                 <span id="sourceInfo" class="sub-text">난수 재생 중</span>
             </div>
             <div class="video-box">
-                <!-- 2개의 비디오 태그를 겹쳐서 번갈아 가며 부드럽게 재생 -->
                 <video id="vid1" autoplay muted playsinline class="active"></video>
                 <video id="vid2" autoplay muted playsinline></video>
             </div>
@@ -302,14 +310,8 @@
 </div>
 
 <script>
-    const studyVideos = [
-        'study_1.mp4', 
-        'study_2.mp4'
-    ];
-
-    const breakVideos = [
-        'break_1.mp4'
-    ];
+    const studyVideos = ['study_1.mp4', 'study_2.mp4'];
+    const breakVideos = ['break_1.mp4'];
 
     let totalSeconds = 30 * 60;
     let timerInterval = null;
@@ -317,7 +319,7 @@
     let currentMode = 'study';
     let accumulatedStudySeconds = 0;
 
-    let activeVidIndex = 1; // 1번 비디오가 기본 활성 상태
+    let activeVidIndex = 1;
     const v1 = document.getElementById('vid1');
     const v2 = document.getElementById('vid2');
 
@@ -326,7 +328,6 @@
         updateDisplay();
     };
 
-    // 비디오가 끝날 때마다 다음 랜덤 영상 교차 재생
     v1.addEventListener('ended', () => handleVideoEnd());
     v2.addEventListener('ended', () => handleVideoEnd());
 
@@ -340,20 +341,15 @@
         const randomIndex = Math.floor(Math.random() * playlist.length);
         const selectedSrc = playlist[randomIndex];
 
-        // 현재 활성 비디오와 대기 중인 비디오를 서로 교체 (핑퐁 구조)
         let currentVid = (activeVidIndex === 1) ? v1 : v2;
         let nextVid = (activeVidIndex === 1) ? v2 : v1;
 
-        // 다음 비디오에 소스 넣고 미리 로드
         nextVid.src = selectedSrc;
         nextVid.load();
         
         nextVid.play().then(() => {
-            // 재생이 시작되는 순간 부드럽게 스르륵 교체 (페이드 효과)
             nextVid.classList.add('active');
             currentVid.classList.remove('active');
-            
-            // 활성 인덱스 스위치
             activeVidIndex = (activeVidIndex === 1) ? 2 : 1;
         }).catch(e => {
             console.log("자동재생 대기중:", e);
