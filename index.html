@@ -66,17 +66,25 @@
         .video-box {
             width: 100%;
             height: 230px;
-            background: #000;
+            background: #000000;
             border-radius: 10px;
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: relative; /* 듀얼 비디오 겹치기를 위한 부모 설정 */
         }
+        /* 2개의 비디오 태그를 서로 겹쳐서 깜빡임 원천 차단 */
         video {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
+            background: #000000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out; /* 부드럽게 스르륵 전환 */
+        }
+        video.active {
+            opacity: 1;
         }
         .status-card {
             background: #21262d;
@@ -111,7 +119,7 @@
             color: #c9d1d9;
         }
 
-        /* 오른쪽 패널 (타이머 및 컨트롤) */
+        /* 오른쪽 패널 (타이머 컨트롤) */
         .right-panel {
             flex: 1;
             display: flex;
@@ -242,7 +250,9 @@
                 <span id="sourceInfo" class="sub-text">난수 재생 중</span>
             </div>
             <div class="video-box">
-                <video id="characterVideo" autoplay muted playsinline></video>
+                <!-- 2개의 비디오 태그를 겹쳐서 번갈아 가며 부드럽게 재생 -->
+                <video id="vid1" autoplay muted playsinline class="active"></video>
+                <video id="vid2" autoplay muted playsinline></video>
             </div>
         </div>
 
@@ -292,7 +302,6 @@
 </div>
 
 <script>
-    // ★ 본인이 폴더에 넣은 실제 영상 파일 이름으로 수정하세요!
     const studyVideos = [
         'study_1.mp4', 
         'study_2.mp4'
@@ -302,35 +311,54 @@
         'break_1.mp4'
     ];
 
-    let totalSeconds = 30 * 60; // 기본 30분
+    let totalSeconds = 30 * 60;
     let timerInterval = null;
-    let isRunning = false;
     let isBreakTime = false;
     let currentMode = 'study';
-    
-    let accumulatedStudySeconds = 0; // 누적 공부 시간
+    let accumulatedStudySeconds = 0;
 
-    const videoElement = document.getElementById('characterVideo');
+    let activeVidIndex = 1; // 1번 비디오가 기본 활성 상태
+    const v1 = document.getElementById('vid1');
+    const v2 = document.getElementById('vid2');
 
     window.onload = () => {
-        playRandomVideo('study');
+        playNextRandomVideo('study');
         updateDisplay();
     };
 
-    // 영상이 끝나면 리스트 내에서 무작위(난수)로 다음 영상 재생
-    videoElement.addEventListener('ended', () => {
-        playRandomVideo(currentMode);
-    });
+    // 비디오가 끝날 때마다 다음 랜덤 영상 교차 재생
+    v1.addEventListener('ended', () => handleVideoEnd());
+    v2.addEventListener('ended', () => handleVideoEnd());
 
-    function playRandomVideo(mode) {
+    function handleVideoEnd() {
+        playNextRandomVideo(currentMode);
+    }
+
+    function playNextRandomVideo(mode) {
         currentMode = mode;
         const playlist = (mode === 'study') ? studyVideos : breakVideos;
         const randomIndex = Math.floor(Math.random() * playlist.length);
+        const selectedSrc = playlist[randomIndex];
+
+        // 현재 활성 비디오와 대기 중인 비디오를 서로 교체 (핑퐁 구조)
+        let currentVid = (activeVidIndex === 1) ? v1 : v2;
+        let nextVid = (activeVidIndex === 1) ? v2 : v1;
+
+        // 다음 비디오에 소스 넣고 미리 로드
+        nextVid.src = selectedSrc;
+        nextVid.load();
         
-        videoElement.src = playlist[randomIndex];
-        videoElement.load();
-        videoElement.play().catch(e => console.log("자동재생 대기중"));
-        
+        nextVid.play().then(() => {
+            // 재생이 시작되는 순간 부드럽게 스르륵 교체 (페이드 효과)
+            nextVid.classList.add('active');
+            currentVid.classList.remove('active');
+            
+            // 활성 인덱스 스위치
+            activeVidIndex = (activeVidIndex === 1) ? 2 : 1;
+        }).catch(e => {
+            console.log("자동재생 대기중:", e);
+        });
+
         document.getElementById('sourceInfo').innerText = `난수 재생 중 (소스 ${randomIndex + 1}/${playlist.length})`;
     }
 
@@ -354,13 +382,13 @@
             badge.className = "mode-badge break";
             timerLabel.innerText = "휴식 시간";
             timerLabel.style.color = "#bb8009";
-            playRandomVideo('break');
+            playNextRandomVideo('break');
         } else {
             badge.innerText = "집중 공부 모드";
             badge.className = "mode-badge";
             timerLabel.innerText = "집중 공부 모드";
             timerLabel.style.color = "#2ea043";
-            playRandomVideo('study');
+            playNextRandomVideo('study');
         }
         updateDisplay();
     }
@@ -382,7 +410,6 @@
                 totalSeconds--;
                 updateDisplay();
 
-                // 공부 모드일 때만 누적 공부 시간 증가 및 경험치 바 반영
                 if (!isBreakTime) {
                     accumulatedStudySeconds++;
                     updateCharacterProgress();
@@ -403,7 +430,6 @@
         const totalMinutes = Math.floor(accumulatedStudySeconds / 60);
         document.getElementById('totalStudyText').innerText = `누적 공부: ${totalMinutes}분`;
 
-        // 경험치바 계산 (예: 100분 채우면 만렙 혹은 단계 승급)
         const progressPercent = Math.min((totalMinutes % 60) / 60 * 100, 100);
         document.getElementById('progressBar').style.width = `${progressPercent}%`;
 
