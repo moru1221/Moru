@@ -572,10 +572,17 @@
         const inputVal = document.getElementById('customMinutes').value.trim();
         const isBreakChecked = document.getElementById('breakModeCheckbox').checked;
 
-        if (isBreakChecked && inputVal === '0824') {
+        // 이스터에그 1: 휴식 체크 + '119' 입력
+        if (isBreakChecked && inputVal === '119') {
             if (window.confirm("너 정말 이만큼 쉴꺼야?")) {
-                triggerEasterEgg();
+                triggerEasterEgg('video_0824.mp4', 824, "119 시크릿 휴식");
             }
+            return;
+        }
+
+        // 이스터에그 2: 휴식 체크 + '60' 입력
+        if (isBreakChecked && inputVal === '60') {
+            triggerEasterEgg('video_60.mp4', 60, "60분 시크릿 휴식");
             return;
         }
 
@@ -616,11 +623,11 @@
         updateDisplay();
     }
 
-    function triggerEasterEgg() {
+    function triggerEasterEgg(videoFilename, durationMins, labelText) {
         stopTimer();
         isEasterEggMode = true;
         isBreakTime = true;
-        totalSeconds = 824 * 60;
+        totalSeconds = durationMins * 60;
 
         stopAllSounds();
 
@@ -629,10 +636,11 @@
 
         badge.innerText = "시크릿 휴식 모드";
         badge.className = "mode-badge easteregg";
-        timerLabel.innerText = "0824 시크릿 휴식";
+        timerLabel.innerText = labelText;
         timerLabel.style.color = "rgb(255, 0, 255)";
 
-        playSpecificVideo('video_0824.mp4', false, false);
+        // 반복 없이(loop: false), 음소거 해제(muted: false) 상태로 지정된 영상 딱 1회 재생
+        playSpecificVideo(videoFilename, false, false);
         document.getElementById('sourceInfo').innerText = "시크릿 영상 재생 중";
         updateDisplay();
     }
