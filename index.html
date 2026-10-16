@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>오늘도 열심히 공부</title>
+
+    <!-- 링크 공유 시 미리보기 제목 및 설명 설정 -->
+    <meta property="og:title" content="오늘도 열심히 공부">
+    <meta property="og:description" content="ASMR과 타이머로 집중력을 높이고 캐릭터를 키워보세요!">
+    <meta property="og:type" content="website">
+
     <style>
         * {
             box-sizing: border-box;
@@ -614,10 +620,9 @@
                 stopTimer();
                 
                 if (isBreakTime) {
-                    // 휴식 종료 알림창 확인 버튼을 누르면 자동으로 30분 집중 공부 모드로 전환
                     alert("휴식 시간이 종료되었습니다! 집중 공부 모드로 전환합니다.");
-                    setTimer(30, false); // 30분 집중 모드로 세팅
-                    startTimer();        // 타이머 자동으로 재시작
+                    setTimer(30, false);
+                    startTimer();
                 } else {
                     alert("공부 시간이 종료되었습니다! 수고하셨습니다.");
                 }
