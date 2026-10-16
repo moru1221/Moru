@@ -150,22 +150,12 @@
         if (!isBreakTime) {
             playVideo(studyVideos[Math.floor(Math.random() * studyVideos.length)], false, true, "집중 영상");
         } else if (breakStage === 1) {
-            // study_3(3번 영상) 종료 후 상태
+            // study_3(3번 영상) 종료 후 마지막 프레임 고정 상태로 정지 유지
             breakStage = 2;
             let cur = activeVid === 1 ? v2 : v1;
             cur.pause();
-            cur.currentTime = cur.duration; // 마지막 프레임 유지
-
-            // 2초 동안 자연스럽게 대기한 후 study_4(4번 영상)로 넘어가서 반복 재생
-            setTimeout(() => {
-                if (isBreakTime && breakStage === 2) {
-                    breakStage = 3;
-                    playVideo('study_4.mp4', true, true, "휴식 영상 (반복)");
-                }
-            }, 2000);
-        } else if (breakStage === 3) {
-            // study_4 반복 재생 중 끝날 경우 다시 4번 재생
-            playVideo('study_4.mp4', true, true, "휴식 영상 (반복)");
+            cur.currentTime = cur.duration; 
+            document.getElementById('sourceInfo').innerText = "휴식 대기 중 (정지 유지)";
         }
     }
 
@@ -223,7 +213,7 @@
         if (isBreakTime) {
             badge.innerText = "휴식 시간 모드"; badge.className = "mode-badge break";
             label.innerText = "휴식 시간"; label.style.color = "#bb8009";
-            breakStage = 1; // 휴식 시작 시 study_3 재생 단계 진입
+            breakStage = 1; // 휴식 시작 시 study_3 재생
             playVideo('study_3.mp4', false, true, "휴식 영상 (시작)");
         } else {
             badge.innerText = "집중 공부 모드"; badge.className = "mode-badge";
@@ -253,11 +243,13 @@
             if (totalSeconds > 0) {
                 totalSeconds--;
                 updateDisplay();
-                // 휴식 종료 2초 전 study_5(5번 영상)로 전환
-                if (isBreakTime && !isEasterEggMode && totalSeconds === 2 && breakStage < 4) {
-                    breakStage = 4;
+                
+                // 휴식 종료 정확히 2초 전 study_5(5번 영상)로 전환
+                if (isBreakTime && !isEasterEggMode && totalSeconds === 2 && breakStage < 3) {
+                    breakStage = 3;
                     playVideo('study_5.mp4', false, true, "휴식 임박 (2초 전)");
                 }
+
                 if (!isBreakTime) {
                     accumulatedStudySeconds++;
                     updateProgress();
