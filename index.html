@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>스터디 메이트 키우기</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0d1117;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .main-container {
+            display: flex;
+            background: #161b22;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+            gap: 30px;
+            width: 900px;
+            border: 1px solid #30363d;
+        }
+        /* 왼쪽 패널 (영상 및 육성 상태) */
+        .left-panel {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .video-card {
+            background: #21262d;
+            border-radius: 14px;
+            padding: 20px;
+            border: 1px solid #30363d;
+            position: relative;
+        }
+        .video-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .mode-badge {
+            background: #2ea043;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .mode-badge.break {
+            background: #bb8009;
+        }
+        .sub-text {
+            color: #8b949e;
+            font-size: 12px;
+        }
+        .video-box {
+            width: 100%;
+            height: 230px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .status-card {
+            background: #21262d;
+            border-radius: 14px;
+            padding: 15px 20px;
+            border: 1px solid #30363d;
+            text-align: center;
+        }
+        .status-quote {
+            color: #8b949e;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+        .progress-bar-bg {
+            background: #30363d;
+            border-radius: 10px;
+            height: 10px;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress-bar-fill {
+            background: #2ea043;
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .status-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #c9d1d9;
+        }
+
+        /* 오른쪽 패널 (타이머 및 컨트롤) */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .panel-title h2 {
+            font-size: 22px;
+            margin-bottom: 5px;
+            color: #f0f6fc;
+        }
+        .panel-title p {
+            color: #8b949e;
+            font-size: 13px;
+        }
+        .timer-card {
+            background: #21262d;
+            border-radius: 14px;
+            padding: 25px 20px;
+            text-align: center;
+            border: 1px solid #30363d;
+            margin: 20px 0;
+        }
+        .timer-mode-label {
+            color: #2ea043;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        #display {
+            font-size: 42px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+        .timer-sub {
+            color: #8b949e;
+            font-size: 12px;
+        }
+        .preset-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .preset-buttons button {
+            flex: 1;
+            padding: 10px 0;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .preset-buttons button:hover {
+            background: #30363d;
+            color: #fff;
+        }
+        .preset-buttons button.break-preset:hover {
+            border-color: #bb8009;
+        }
+        .custom-input-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .custom-input-box input {
+            flex: 1;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 10px;
+            color: white;
+            text-align: center;
+            outline: none;
+        }
+        .custom-input-box input:focus {
+            border-color: #2ea043;
+        }
+        .custom-input-box button {
+            padding: 0 15px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .custom-input-box button:hover {
+            background: #30363d;
+            color: #fff;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .action-buttons button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-start {
+            background: #2ea043;
+            color: white;
+        }
+        .btn-start:hover { background: #2c974b; }
+        .btn-stop {
+            background: #da3633;
+            color: white;
+        }
+        .btn-stop:hover { background: #c5302c; }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <!-- 왼쪽 영역: 영상 및 캐릭터 상태 -->
+    <div class="left-panel">
+        <div class="video-card">
+            <div class="video-header">
+                <span id="modeBadge" class="mode-badge">집중 공부 모드</span>
+                <span id="sourceInfo" class="sub-text">난수 재생 중</span>
+            </div>
+            <div class="video-box">
+                <video id="characterVideo" autoplay muted playsinline></video>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-quote">"열심히 집중하면 캐릭터가 성장해요!"</div>
+            <div class="progress-bar-bg">
+                <div id="progressBar" class="progress-bar-fill" style="width: 0%;"></div>
+            </div>
+            <div class="status-footer">
+                <span id="totalStudyText">누적 공부: 0분</span>
+                <span id="levelText">성장 단계: Lv.1 연습생</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 오른쪽 영역: 타이머 컨트롤 -->
+    <div class="right-panel">
+        <div>
+            <div class="panel-title">
+                <h2>스터디 메이트 키우기</h2>
+                <p>타이머를 설정하고 캐릭터와 함께 공부하세요.</p>
+            </div>
+
+            <div class="timer-card">
+                <div id="timerModeLabel" class="timer-mode-label">집중 공부 모드</div>
+                <div id="display">00:30:00</div>
+                <div class="timer-sub">목표 시간을 향해 달려보세요!</div>
+            </div>
+
+            <div class="preset-buttons">
+                <button onclick="setTimer(30, false)">30분 집중</button>
+                <button onclick="setTimer(60, false)">1시간 집중</button>
+                <button class="break-preset" onclick="setTimer(10, true)">10분 휴식</button>
+            </div>
+
+            <div class="custom-input-box">
+                <input type="number" id="customMinutes" placeholder="직접 입력 (분)" min="1">
+                <button onclick="setCustomTimer()">설정</button>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-start" onclick="startTimer()">타이머 시작</button>
+            <button class="btn-stop" onclick="stopTimer()">정지 / 초기화</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ★ 본인이 폴더에 넣은 실제 영상 파일 이름으로 수정하세요!
+    const studyVideos = [
+        'study_1.mp4', 
+        'study_2.mp4'
+    ];
+
+    const breakVideos = [
+        'break_1.mp4'
+    ];
+
+    let totalSeconds = 30 * 60; // 기본 30분
+    let timerInterval = null;
+    let isRunning = false;
+    let isBreakTime = false;
+    let currentMode = 'study';
+    
+    let accumulatedStudySeconds = 0; // 누적 공부 시간
+
+    const videoElement = document.getElementById('characterVideo');
+
+    window.onload = () => {
+        playRandomVideo('study');
+        updateDisplay();
+    };
+
+    // 영상이 끝나면 리스트 내에서 무작위(난수)로 다음 영상 재생
+    videoElement.addEventListener('ended', () => {
+        playRandomVideo(currentMode);
+    });
+
+    function playRandomVideo(mode) {
+        currentMode = mode;
+        const playlist = (mode === 'study') ? studyVideos : breakVideos;
+        const randomIndex = Math.floor(Math.random() * playlist.length);
+        
+        videoElement.src = playlist[randomIndex];
+        videoElement.load();
+        videoElement.play().catch(e => console.log("자동재생 대기중"));
+        
+        document.getElementById('sourceInfo').innerText = `난수 재생 중 (소스 ${randomIndex + 1}/${playlist.length})`;
+    }
+
+    function updateDisplay() {
+        const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+        const seconds = String(totalSeconds % 60).padStart(2, '0');
+        document.getElementById('display').innerText = `${hours}:${minutes}:${seconds}`;
+    }
+
+    function setTimer(minutes, breakMode) {
+        stopTimer();
+        totalSeconds = minutes * 60;
+        isBreakTime = breakMode;
+
+        const badge = document.getElementById('modeBadge');
+        const timerLabel = document.getElementById('timerModeLabel');
+
+        if (isBreakTime) {
+            badge.innerText = "휴식 시간 모드";
+            badge.className = "mode-badge break";
+            timerLabel.innerText = "휴식 시간";
+            timerLabel.style.color = "#bb8009";
+            playRandomVideo('break');
+        } else {
+            badge.innerText = "집중 공부 모드";
+            badge.className = "mode-badge";
+            timerLabel.innerText = "집중 공부 모드";
+            timerLabel.style.color = "#2ea043";
+            playRandomVideo('study');
+        }
+        updateDisplay();
+    }
+
+    function setCustomTimer() {
+        const mins = parseInt(document.getElementById('customMinutes').value);
+        if (isNaN(mins) || mins <= 0) {
+            alert("올바른 분(Minute)을 입력하세요.");
+            return;
+        }
+        setTimer(mins, false);
+    }
+
+    function startTimer() {
+        if (timerInterval || totalSeconds <= 0) return;
+        
+        timerInterval = setInterval(() => {
+            if (totalSeconds > 0) {
+                totalSeconds--;
+                updateDisplay();
+
+                // 공부 모드일 때만 누적 공부 시간 증가 및 경험치 바 반영
+                if (!isBreakTime) {
+                    accumulatedStudySeconds++;
+                    updateCharacterProgress();
+                }
+            } else {
+                stopTimer();
+                alert(isBreakTime ? "휴식 시간이 종료되었습니다!" : "공부 시간이 종료되었습니다! 수고하셨습니다.");
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+
+    function updateCharacterProgress() {
+        const totalMinutes = Math.floor(accumulatedStudySeconds / 60);
+        document.getElementById('totalStudyText').innerText = `누적 공부: ${totalMinutes}분`;
+
+        // 경험치바 계산 (예: 100분 채우면 만렙 혹은 단계 승급)
+        const progressPercent = Math.min((totalMinutes % 60) / 60 * 100, 100);
+        document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+        let level = Math.floor(totalMinutes / 60) + 1;
+        document.getElementById('levelText').innerText = `성장 단계: Lv.${level} 수련생`;
+    }
+</script>
+
+</body>
+</html>
